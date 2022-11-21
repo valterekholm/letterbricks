@@ -1,0 +1,279 @@
+#include <stdio.h>
+#include <iostream>
+#include <stdlib.h>
+
+//This is programmed after connecting squares (sq1)
+
+// the GLUT and OpenGL libraries have to be linked correctly
+// g++ rotateCube.cc -lglut -lGL -lGLU -o rotateCube
+#ifdef __APPLE__
+#include <OpenGL/OpenGL.h>
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
+#include "../drinlett.h"
+
+//int NEIGHBOUR = 0;
+
+using namespace std;
+
+// The coordinates for the vertices of the cube
+//double x = 1;
+//double y = 1;
+double z = 1;
+
+float angle = 0.0;
+
+//a struct for an instance of a "tile", having a shape, and up to three connected [gameTile]'s (neighborugs), generally defined counter clockwise
+//in this version, the shape is a [rectangle] plus the "top triangle" (angle, direction)
+//the rectangle's coordinates are defined in a separate "room" centered around (x/y) 0,0
+typedef struct gameTile{
+  struct rectangle r; //reference to re-use rectangle(s)
+  double angle;
+  enum dire d;
+
+  struct gameTile* n1;
+  struct gameTile* n2;
+  struct gameTile* n3;
+  
+} tTile;//tested in this file, if working ok TODO: move to ../drinlett.h
+
+void printStructGameTile(tTile * t){
+  printf("\n----tTile----\n");
+  printStructRectangle(t->r);
+  printf("Angle: %f\n", t->angle);
+  printf("Direction: ");
+  if(t->d == r) printf("right");
+  else printf("left");
+  printf("\n");
+  if(t->n1 == NULL) printf("n1 is null, "); else printf("n1 is set, ");
+  if(t->n2 == NULL) printf("n2 is null, "); else printf("n2 is set, ");
+  if(t->n3 == NULL) printf("n3 is null, "); else printf("n3 is set, ");
+  printf("\n-------------\n");
+  
+}
+
+//struct gameTile t1, t2;
+
+void explainGameTile(tTile * t, int treeLevel){
+  printf("\n-----------\n");
+  for(int i=0;i<treeLevel;i++) printf(" ");
+  
+  printf("(%d)Tile with angle %f, ", treeLevel++, t->angle);
+  if(t->n1 == NULL) printf("n1 is null, ");
+  else explainGameTile(t->n1, treeLevel);
+  if(t->n2 == NULL) printf("n2 is null, ");
+  else explainGameTile(t->n2, treeLevel);
+  if(t->n3 == NULL) printf("n3 is null, ");
+  else explainGameTile(t->n3, treeLevel);
+
+  printf("\n");
+  
+  glBegin(GL_POLYGON);
+  glColor3f(0.5, 0.3, 0.2);
+  glVertex3f(t->r.p1.x, t->r.p1.y, z);
+  glVertex3f(t->r.p2.x, t->r.p2.y, z);
+  glVertex3f(t->r.p3.x, t->r.p3.y, z);
+  glVertex3f(t->r.p4.x, t->r.p4.y, z);
+  glEnd();
+}
+
+//to render a chain of tiles
+void renderGameTile(tTile * t, int treeLevel, tTile * prev = NULL){
+  printf("\n");
+  printStructGameTile(t);
+
+  for(int i=0;i<treeLevel;i++) printf(" ");
+
+  struct rectangle tempR;
+
+  tempR = makeRect(t->r);//to position relative to previous tile...
+  
+  printf("(%d)Tile with angle %f, ", treeLevel++, t->angle);
+  
+  if(prev == NULL){
+    printf(" (prev is null) ");
+  }
+  else{
+
+    struct coord2d left;
+    struct coord2d right;
+    
+    printf(" (tile should start from ");
+    printStructCoord2d(prev->r.p1);
+    printStructCoord2d(prev->r.p4);
+    printf(")");
+
+    if(t== prev->n1){ printf("is n1!"); left = prev->r.p2; right = prev->r.p1; }
+    if(t== prev->n2){ printf("is n2!"); left = prev->r.p3; right = prev->r.p2; }
+    if(t== prev->n3){ printf("is n3!"); left = prev->r.p4; right = prev->r.p3; }
+
+    tempR = getRectangleFromBaseLineAndHeightWidth(left, right, getDistBetweenCoord2ds(left, right), 2);//TODO: last arg must be calculated
+    t->r = tempR;
+  }
+  if(t->n1 == NULL) printf("n1 is null, ");
+  else renderGameTile(t->n1, treeLevel, t);//todo: get the args for getRectangleFromBaseLineAndHeightWidth
+  if(t->n2 == NULL) printf("n2 is null, ");
+  else renderGameTile(t->n2, treeLevel, t);
+  if(t->n3 == NULL) printf("n3 is null, ");
+  else renderGameTile(t->n3, treeLevel, t);
+
+  printf("\n");
+  
+  glBegin(GL_POLYGON);
+  glColor3f(0.5, 0.3, 0.2);
+  glVertex3f(t->r.p1.x, t->r.p1.y, z);
+  glVertex3f(t->r.p2.x, t->r.p2.y, z);
+  glVertex3f(t->r.p3.x, t->r.p3.y, z);
+  glVertex3f(t->r.p4.x, t->r.p4.y, z);
+  glEnd();
+}
+
+
+void drawCube()
+{
+
+  // T WITH 5 BLOCKS
+  tTile* t1;
+  tTile* t2;
+  tTile* t3;
+  tTile* t4;
+  tTile* t5;
+
+  t1 = (tTile*)malloc(sizeof(tTile));
+  t2 = (tTile*)malloc(sizeof(tTile));
+  t3 = (tTile*)malloc(sizeof(tTile));
+  t4 = (tTile*)malloc(sizeof(tTile));
+  t5 = (tTile*)malloc(sizeof(tTile));
+
+  const struct rectangle r = makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));//a square
+  //should not be changed after (this) initialization
+
+  
+  t1->n1=NULL;//neighbourgs
+  t1->n2=t2;
+  t1->n3=NULL;
+
+  t2->n1=NULL;
+  t2->n2=t3;
+  t2->n3=NULL;
+
+  t3->n1 = t4;
+  t3->n3 = t5;
+
+
+  t1->r = makeRect(r);//make a clone
+  t2->r = makeRect(r);
+  t3->r = makeRect(r);
+  t4->r = makeRect(r);
+  t5->r = makeRect(r);
+  
+  t1->angle = t2->angle = t3->angle = t4->angle = t5->angle = 0;
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Reset transformations
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+
+        glTranslatef(0.0, 0.0, -15.0);//camera
+
+        // Add an ambient light
+        GLfloat ambientColor[] = {0.2, 0.2, 0.2, 1.0};
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor);
+
+        // Add a positioned light
+        GLfloat lightColor0[] = {0.5, 0.5, 0.5, 1.0};
+        GLfloat lightPos0[] = {4.0, 0.0, 8.0, 1.0};
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor0);
+        glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
+
+        glTranslatef(0.5, 1.0, 0.0);
+        glRotatef(angle, 1.0, 1.0, 1.0);
+
+    glRotatef( angle, 1.0, 0.0, 1.0 );
+    glRotatef( angle, 0.0, 1.0, 1.0 );
+        glTranslatef(-0.5, -1.0, 0.0);
+
+    renderGameTile(t1, 0);
+
+        glFlush();
+    glutSwapBuffers();
+
+    free(t1);
+    free(t2);
+}
+
+// Function for increasing the angle variable smoothly, 
+// keeps it <=360
+// It can also be implemented using the modulo operator.
+void update(int value)
+{
+        angle += 1.0f;
+        if (angle > 360)
+                {
+                        angle -= 360;
+        }
+
+        glutPostRedisplay();
+        glutTimerFunc(25, update, 0);
+}
+
+// Initializes 3D rendering
+void initRendering()
+{
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_COLOR_MATERIAL);
+
+        // Set the color of the background
+        glClearColor(0.7f, 0.8f, 1.0f, 1.0f);
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+        glEnable(GL_NORMALIZE);
+}
+
+
+// Called when the window is resized
+void handleResize(int w, int h)
+{
+        glViewport(0, 0, w, h);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluPerspective(45.0, (double)w / (double)h, 1.0, 200.0);
+}
+
+
+int main(int argc, char **argv)
+{
+
+  if(argc==2){
+    //printf("Argument is %s\n", argv[1]);
+
+    char fl = argv[1][0];
+
+    printf("first letter of arg; %c\n", fl);
+
+    
+  }
+  else{
+    
+  }
+    
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(700, 700);
+    glutInitWindowPosition(100, 100);
+    glutCreateWindow("OpenGL - Rotating a Cube");
+    initRendering();
+
+    glutDisplayFunc(drawCube);
+    glutReshapeFunc(handleResize);
+
+    // Add a timer for the update(...) function
+    //glutTimerFunc(25, update, 0);
+
+    glutMainLoop();
+    return 0;
+}

@@ -1,0 +1,208 @@
+kvadrater ska ritas som tillsammans bildar bokstäver.
+På dessa ska man kunna köra med en bil.
+När man kör på en ruta "tänds" den (blir ljusare).
+När bokstavens alla rutor är tända har man klarat bokstaven.
+För att tvinga användaren att tända alla rutor i en bokstav som T,
+så har man portar som är låsta, och som kräver en nyckel.
+Så i T skulle man börja från botten, och i förgreningen i toppen, bara
+kunna åka åt vänster för att där i slutet hitta en nyckel.
+Då öppnas porten (blockering försvinner) till andra sidan av T (toppen).
+Detta behövs också för att en bana, bestående av flera bokstäver,
+ska köras igenom på ett sammanhållet sätt.
+Dock behövs teleportörer ("tunnlar") mellan bokstäver.
+Detta eftersom ingen väg finns mellan fristående bokstäver.
+
+(Allt ska ske på platt mark, så rutor blir 2D)
+
+Det ska vara kvadrater och polygoner med 4 hörn, samt med 3 hörn,
+som fogas samman.
+I exemplet med kvadrater (och kanske trianglar) så anger man de fyra hörnen,
+vid kvadratens, "formens" skapande, i ett separat koordinatsystem.
+
+I själva spelet får en form dock olika koordinater beroende på placering.
+
+För att hålla ordning på formen börjar man att ange "botten"linje.
+
+Det är den sida som bilen åker in i (eller ev. börjar från).
+
+Bokstaven definieras som en väg som körs i en riktning.
+
+Dock sker förgreningar.
+
+En bokstav ska kunna sparas i ett läsligt/logiskt format.
+Samma med en form.
+
+För att börja kan en form (en kvadrat) definieras som (x y);
+
+-1 -1, 1 -1, 1 1, -1 1
+[ref.1]
+
+Det är från vänstra botten i moturs riktning.
+
+Denna form ska sen kunna återanvändas och kopplas till t.ex. ett T.
+
+Då ordningen på koordinater kan numreras 0-3, kan sidorna också numreras 0-3.
+
+0 är alltså botten och även startpunkten för bilen.
+Det är (x y) -1 -1.
+
+Sen ska denna form kopplas till en likadan... och det ska gå på alla sidor utom startsidan.
+
+I Java skulle detta kunna definieras i en klass som har medlemsvariabler av sin egen typ.
+
+I C kan det gå med struct...
+
+Så en struct ska ange ur-formens koordinater, se ref.1.
+
+Krångligt om det både kan vara 3 och fyra koordinater.
+Kanske kan man i fallet av tre, ha fyra, men de sista två identiska.
+
+Dock först för koordinat:
+
+typedef struct{
+double x,y;
+} Coord;
+
+Tills vidare:
+
+typdef struct{
+Coord p1,p2,p3,p4;
+} Shape;
+
+En annan struct ska ange en instans av denna form.
+
+Det kan kallas "tile" (engelska för platta, typ kakelplatta).
+
+typedef struct{
+Shape shape;
+Tile next1,next2,next3;
+} Tile;
+
+Hur detta ska formuleras i läsbart format, lämnas tills vidare.
+
+Som kod kan provas detta:
+
+(utifrån tidigare definitioner)
+
+Coord c1,c2,c3,c4;
+
+//-1 -1, 1 -1, 1 1, -1 1
+
+c1.x = -1;
+c1.y = -1;
+c2.x = 1;
+c2.y = -1;
+c3.x = 1;
+c3.y = 1;
+c4.x = -1;
+c4.y = 1;
+
+
+
+Shape shape1;
+shape1.p1 = c1;
+shape1.p2 = c2;
+shape1.p3 = c3;
+shape1.p4 = c4;
+
+Tile tile1, tile2;
+
+tile1.shape = shape1;
+tile2.shape = shape1;
+tile1.next2 = tile2;
+
+Då borde ruta ett följas av en likadan ovanför.
+
+MED OPENGL
+
+Då anges koordinater vanligen i spannet -1 till 1...
+
+Man kan då skapa en rektangel, som i exemplet på
+https://www.linuxjournal.com/content/introduction-opengl-programming
+
+    glBegin(GL_POLYGON);
+    glColor3f(0.5, 0.3, 0.2);
+    glVertex3f(x, -y, z); //hörn 1
+    glVertex3f(x, y, z); //hörn 2
+    glVertex3f(-x, y, z); //hörn 3
+    glVertex3f(-x, -y, z); //hörn 4
+    glEnd();
+
+fast man använder en "Tile" för x/y koordinater.
+Där ritas den från höger/botten hörnet moturs.
+
+
+Rutor som bildar kurvor.
+------------------------
+Det kanske enklaste sättet att definiera detta är med en rektangel påbyggd med en triangel, som sen grupperas till en form.
+
+Funktion för att skapa en ruta med böj.
+Då alla rutor ska ha samma bredd i basen (troligen 2), behövs rutas bredd ej anges.
+
+Höjd behövs samt vinkel på topp-triangel samt riktning på böjen.
+
+Alltså: length, angle, direction.
+
+Om angle är 0 ska [direction] ignoreras.
+
+Bokstäver byggda av trianglar.
+------------------------------
+
+Emedan det går att rita de flesta bokstäver med rektanlar och tillagda trianglar för att böja en stapel, så finns bokstäver som tycks krångliga att bygga så.
+
+X, V är exempel på dem. Eftersom de bägge har hörn som är vassare än 90 grader. Med tidigare metod skulle dessa hörn bli avtrubbade.
+
+Jag söker förstå hur ett rutnät av trianglar (kan kallas bikupe-triangelnät) kan användas för bokstäver som X och V. Detta ska bestå av liksidiga trianglar, och kan ritas om man ritar linjer på ett papper i tre vinklar, t.ex. 90, 150 och 210 grader. Kanske det kan kallas triangelnät.
+
+Iställlet för "rutor" kan man prata om "celler".
+
+Då bildas trianglar som ligger om lott. Endera är de ståendes på botten eller balanserandes på spets. Två intilliggande trianglar kan inte ha samma orientering.
+Jag kallar dem tills vidare hanar och honor (ståendes på botten / ståendes på spets).
+(Isometriskt rutnät kan det kallas - dock i detta fallet med en linje horisontell).
+
+X kan göras med 14 trianglar fyllda.
+
+Med samma ide att bokstäverna ska byggas upp med rutor som följer på varran, blir detta dock annorlunda med trianglarna.
+
+De har två lägen (hane/hona), och dessa kan ha en granne olika. Hanen kan ha nedanför, till höger och till vänster.
+Honan kan ha ovanför/höger/vänster.
+
+Det kan tyckas som att grannarna är "snett uppåt höger" eller "snett neråt vänster", men för programmets funktion verkar det enklast att kalla det höger/vänster.
+
+Ett V kan ritas med 7 trianglar. Om man börjar uppifrån höger, blir det:
+
+1) start på en hona
+2) gå vänster
+3) gå ner
+4) gå vänster
+5) gå vänster
+6) gå upp
+7) gå vänster
+
+Varannan är hane, och varannan är hona; hona-hane-hona-hane-hona-hane-hona.
+
+I C finns "union", att man har en datasamling, likt struct, men att olika medlemsvariabler utesluter varann;
+om den ena tilldelas värde blir den andra tom (NULL).
+Det verkar passande för att beskriva hane/hona. Om man har en "granne" upp och en "granne" ner som utesluter varandra, kan detta signalera om det är hane eller hona.
+
+Granne höger respektive vänster finns dock för samtliga celler.
+
+När en bokstav definieras - på ett sätt som ska likna rutorna - kan man ej ange deras "kön", utom på den inledande cellen.
+
+Könet på den inledande cellen kan dock implicit anges genom att man har en osynlig cell som egentligen inleder skaran av celler.
+Den "könstyrande" cellen för "V" blir då: "en triangel som har en granne neråt". Denna "granne neråt" blir den första synliga cellen, den högst upp till höger i V.
+
+Instruktionen blir då
+
+0) starta på enn cell
+1) gå neråt
+2) gå vänster
+3) gå ner
+4) gå vänster
+5) gå vänster
+6) gå upp
+7) gå vänster
+
+>>>dölj första
+
+En enskild cell ska inte vara roterbar, men möjligen det "omgivande cellnätet". 

@@ -6,6 +6,12 @@
 /*this program was made to find the steps involved in drawing cells connected to form letter B*/
 /*To build the junktion of the two rings in 'B' I begin using a 5 corner shape, needing to make a new struct; polyCell*/
 /*made after letter-a.cc, 4 dec -21*/
+/*notes*/
+/*2022-11-23 got stuck on the step from the middle 5-sided polygon to the 3:rd square. The 3:rd polygon is missplaced to far down/left*/
+/*Also stuck in the formulation, about the order of actions, and should each polytiles polygon have a 0/0 position to easy up scaling,*/
+/*cloning it to a temp struct (like turning_square_4, where one square was shared) for the rendering or should they have all positions firm*/
+/*also wondering if the recursive calls could mess upp the positions, as each position/tile is calculated while iterating/building/rendering */
+/*letter C would be easier*/
 
 // the GLUT and OpenGL libraries have to be linked correctly
 // g++ rotateCube.cc -lglut -lGL -lGLU -o rotateCube

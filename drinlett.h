@@ -892,6 +892,9 @@ struct letter{
 
 struct rectangle renderLetter(struct letter l){
   //TODO: if l has initialAngle != 0, do rotateRectangle on firstTile
+  if(l.initialAngle != 0){
+    rotateRectangle(&(l.firstTile->r), l.initialAngle);
+  }
   renderGameTile(l.firstTile, 0);
 }
 

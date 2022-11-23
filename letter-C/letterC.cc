@@ -24,7 +24,7 @@ double x = 1;
 double y = 1;
 double z = 1;
 
-float angle = 45.0;
+float angle = 0.0;
 
 float scale = 1;//for squares
 
@@ -55,6 +55,7 @@ void drawCube()
   t1->d = t2->d = t3->d = t4->d = t5->d = t6->d = t7->d = t8->d = t9->d = r;
 
 
+  //neighbours
   t1->n2 = t2;
   t2->n2 = t3;
   t3->n2 = t4;
@@ -64,6 +65,10 @@ void drawCube()
   t7->n2 = t8;
   t8->n2 = t9;
   t9->n2 = t10;
+
+  struct letter letterC;
+  letterC.firstTile = t1;
+  letterC.initialAngle = 259;
   
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -90,7 +95,8 @@ void drawCube()
     glRotatef( angle, 0.0, 1.0, 1.0 );
     glTranslatef(-0.5, -1.0, 0.0);
 
-    renderGameTile(t1, 0);
+    //renderGameTile(t1, 0);
+    renderLetter(letterC);
     
     glFlush();
     glutSwapBuffers();
@@ -172,28 +178,6 @@ int main(int argc, char **argv)
     
   }
 
-  printf("getAngleBetweenPoints test\n");
-  printf("0/0 to 0/1 should be 0\n");
-  getAngleBetweenPoints(coord2dFromXY(0,0), coord2dFromXY(0,1));
-  printf("getAngleBetweenPoints test\n");
-  printf("0/0 to 1/0 should be 90\n");
-  getAngleBetweenPoints(coord2dFromXY(0,0), coord2dFromXY(1,0));
-  printf("getAngleBetweenPoints test\n");
-  printf("0/0 to 0/-1 should be 180\n");
-  getAngleBetweenPoints(coord2dFromXY(0,0), coord2dFromXY(0,-1));
-  printf("getAngleBetweenPoints test\n");
-  printf("0/0 to -1/0 should be 270\n");
-  getAngleBetweenPoints(coord2dFromXY(0,0), coord2dFromXY(-1,0));
-  printf("getAngleBetweenPoints test\n");
-  printf("0/0 to 1/1 should be 45\n");
-  getAngleBetweenPoints(coord2dFromXY(0,0), coord2dFromXY(1,1));
-  printf("getAngleBetweenPoints test\n");
-  printf("0/0 to -1/-1 should be 225\n");
-  getAngleBetweenPoints(coord2dFromXY(0,0), coord2dFromXY(-1,-1));
-  printf("getAngleBetweenPoints test\n");
-  printf("1/1 to 0/0 should be 225\n");
-  getAngleBetweenPoints(coord2dFromXY(1,1), coord2dFromXY(0,0));
-  
   x *= scale;
   y *= scale;
   z *= scale;

@@ -36,7 +36,7 @@ void drawCube()
   tTile* t2;
   tTile* t3;
   tTile* t4;
-  tTile* t5, * t6, * t7, * t8, * t9, * t10, * t11, * t12, * t13, * t14, * t15;
+  tTile* t5, * t6, * t7, * t8, * t9, * t10, * t11, * t12, * t13, * t14, * t15, * t16;
   t1 = (tTile*)malloc(sizeof(tTile));
   t2 = (tTile*)malloc(sizeof(tTile));
   t3 = (tTile*)malloc(sizeof(tTile));
@@ -52,10 +52,11 @@ void drawCube()
   t13 = (tTile*)malloc(sizeof(tTile));
   t14 = (tTile*)malloc(sizeof(tTile));
   t15 = (tTile*)malloc(sizeof(tTile));
+  t16 = (tTile*)malloc(sizeof(tTile));
   
   const struct rectangle rect = makeRect(mc2d(1,-1),mc2d(1,0.3),mc2d(-1,0.3),mc2d(-1,-1));
 
-  t1->r = t2->r = t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = t11->r = t12->r = t13->r = t14->r = t15->r = rect;
+  t1->r = t2->r = t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = t11->r = t12->r = t13->r = t14->r = t15->r = t16->r = rect;
   t1->angle = t2->angle = t3->angle = t4->angle = t5->angle = t6->angle = t7->angle = t8->angle = 22;
   t9->angle = 4;
   t1->d = t2->d = t3->d = t4->d = t5->d = t6->d = t7->d = t8->d = t9->d = r;
@@ -76,6 +77,7 @@ void drawCube()
   t12->n2 = t13;
   t13->n2 = t14;
   t14->n2 = t15;
+  t15->n2 = t16;
 
   struct letter letterD;
   letterD.firstTile = t1;
@@ -195,10 +197,16 @@ int main(int argc, char **argv)
   
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    
     glutInitWindowSize(700, 700);
     glutInitWindowPosition(100, 100);
     glutCreateWindow("OpenGL - Rotating a Cube");
     initRendering();
+
+    //wire frame mode
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    //to switch back
+    //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
     glutDisplayFunc(drawCube);
     glutReshapeFunc(handleResize);

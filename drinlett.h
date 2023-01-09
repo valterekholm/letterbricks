@@ -120,7 +120,7 @@ struct rectangle{
 struct triangle{
     double side; //length (of radius - the cirkle tangenting the coorners)
     struct coord2d center;
-    float rotation; //120 degrees real use, currently not used - assuming an isometric grid
+    double rotation; //120 degrees real use, currently not used - assuming an isometric grid
 };
 
 struct triangle makeTri(double side, struct coord2d center = mc2d(0,0)){
@@ -212,16 +212,16 @@ gender getOpposite(gender g){
 }
 
 //x value
-float sin_degr(float angle){
-  float val = PI / 180;
-  float ret = sin(angle * val);
+double sin_degr(double angle){
+  double val = PI / 180;
+  double ret = sin(angle * val);
   return ret;
 }
 
 //y value
-float cos_degr(float angle){
-  float val = PI / 180;
-  float ret = cos(angle * val);
+double cos_degr(double angle){
+  double val = PI / 180;
+  double ret = cos(angle * val);
   return ret;
 }
 
@@ -342,10 +342,10 @@ struct coord2d coord2dFromXY(double x, double y){
 
 double getDistBetweenCoord2ds(struct coord2d c1, struct coord2d c2){
 
-    float distX = abs(c1.x - c2.x);
-    float distY = abs(c1.y - c2.y);
+    double distX = abs(c1.x - c2.x);
+    double distY = abs(c1.y - c2.y);
 
-    float dist = sqrt(distX*distX + distY*distY);
+    double dist = sqrt(distX*distX + distY*distY);
     return dist;
 }
 
@@ -382,19 +382,19 @@ struct rectangle getRectangleFromBaseLineAndHeightWidth(struct coord2d left, str
   printf("calculated atan from x/y %f %f to %f\n", distX, distY, at);
   double angle = at;
   
-  float x = sin_degr(angle);//swap
-  float y = cos_degr(angle);
+  double x = sin_degr(angle);//swap
+  double y = cos_degr(angle);
 
   x *= height;
   y *= height;
 
   //x and y is offset from a point on baseline to corresponding point on the top
 
-  float p2x = right.x + x;
-  float p2y = right.y + y;
+  double p2x = right.x + x;
+  double p2y = right.y + y;
 
-  float p3x = left.x + x;
-  float p3y = left.y + y;
+  double p3x = left.x + x;
+  double p3y = left.y + y;
 
   struct rectangle r;
   r.p1 = right;
@@ -534,8 +534,8 @@ struct coord2d getCoordTopTriangle(tTile tile){
 
   int factor = tile.d==l ? -1 : 1; // direction
   
-  float x = cos_degr((tile.angle) * factor);
-  float y = sin_degr((tile.angle) * factor);
+  double x = cos_degr((tile.angle) * factor);
+  double y = sin_degr((tile.angle) * factor);
 
   double tileWidth = getDistBetweenCoord2ds(tile.r.p1, tile.r.p4);
 
@@ -581,8 +581,8 @@ struct coord2d getCoordTopTriangle(tTile * tile){
 
   int factor = tile->d==l ? -1 : 1; // direction
   
-  float x = cos_degr((tile->angle) * factor);
-  float y = sin_degr((tile->angle) * factor);
+  double x = cos_degr((tile->angle) * factor);
+  double y = sin_degr((tile->angle) * factor);
 
   double tileWidth = getDistBetweenCoord2ds(tile->r.p1, tile->r.p4);
 
@@ -651,7 +651,7 @@ void explainGameTile(tTile * t, int treeLevel, double z = 1){
   glEnd();*/ //moved to renderGameTile
 }
 
-//to render a chain of square tiles
+//to render a tile (or chain of square tiles)
 //return y height
 double renderGameTile(tTile * t, int treeLevel, tTile * prev = NULL){
   double z = 1;
@@ -716,6 +716,12 @@ double renderGameTile(tTile * t, int treeLevel, tTile * prev = NULL){
   if(t->angle != 0){
     int direction_swapper = t->d == r ? 1 : -1;//r is right
     struct coord2d topTri = getTopPoint(t->r.p3, t->r.p2, t->angle * direction_swapper);
+    double whatDis = getDistBetweenCoord2ds(t->r.p3, t->r.p2);
+    double whatCos = cos_degr(t->angle);
+    double whatSin = sin_degr(t->angle);
+    double whatHeight = whatSin * whatDis;//the "height" of the topTri - the peak on the tile, if there is an angle
+    //should try decrease the tile to compensate for this peak.
+    printf("whatDis %.2f, whatSin %.2f, whatCos %.2f, whatHeight %.2f\n", whatDis, whatSin, whatCos, whatHeight);
     nr3 = topTri;
   }
   else{
@@ -723,7 +729,7 @@ double renderGameTile(tTile * t, int treeLevel, tTile * prev = NULL){
   }
 
   glBegin(GL_POLYGON);
-  glColor3f(0.5, 0.3, ((float)treeLevel/10));
+  glColor3f(0.5, 0.3, treeLevel/10);
   glVertex3f(t->r.p1.x, t->r.p1.y, z);
   glVertex3f(t->r.p2.x, t->r.p2.y, z);
   //here if angle topTri
@@ -852,7 +858,7 @@ void renderGameTriTile(tTriTile* tt, int treeLevel, tTriTile* prev, gender g){//
 
 //assuming tile is centered at 0,0 and spans 2 in width.
 //replaced by getTopPoint
-struct coord2d getCoordTopTriangle(enum dire d, float angle, struct rectangle rect){
+struct coord2d getCoordTopTriangle(enum dire d, double angle, struct rectangle rect){
   printf("getCoordTopTriangle angle %f\n", angle);
   if(d == l){
     printf("l\n");
@@ -861,8 +867,8 @@ struct coord2d getCoordTopTriangle(enum dire d, float angle, struct rectangle re
 
   //since sin (x-related) and cos (y...) would have origin in circle's top I must change the orientation since I want origin to be either right or left end of circle
   
-  float x = cos_degr(angle);
-  float y = sin_degr(angle);
+  double x = cos_degr(angle);
+  double y = sin_degr(angle);
 
   x *= TILEW;
   y *= TILEW;
@@ -891,7 +897,6 @@ struct letter{
 };
 
 struct rectangle renderLetter(struct letter l){
-  //TODO: if l has initialAngle != 0, do rotateRectangle on firstTile
   if(l.initialAngle != 0){
     rotateRectangle(&(l.firstTile->r), l.initialAngle);
   }
@@ -931,7 +936,7 @@ double angleR1 = (180 - (double)step/2);
 double adiff = angleL1 - angleR1;//i.e. 90 in a square
 
 //get angle between points
-float abp = getAngleBetweenPoints(left, right);
+double abp = getAngleBetweenPoints(left, right);
 printf("angle between points: %.1f\n", abp);
 
 //angle towards center should then be 90 less from plane but from a point?
@@ -997,7 +1002,7 @@ double angleR1 = (180 - (double)step/2);
 double adiff = angleL1 - angleR1;//i.e. 90 in a square
 
 //get angle between points
-float abp = getAngleBetweenPoints(left, right);
+double abp = getAngleBetweenPoints(left, right);
 printf("angle between points: %.1f\n", abp);
 
 //angle towards center should then be 90 less from plane but from a point?

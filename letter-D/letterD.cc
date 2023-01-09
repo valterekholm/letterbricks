@@ -36,7 +36,7 @@ void drawCube()
   tTile* t2;
   tTile* t3;
   tTile* t4;
-  tTile* t5, * t6, * t7, * t8, * t9, * t10, * t11, * t12, * t13, * t14, * t15, * t16;
+  tTile* t5, * t6, * t7, * t8, * t9, * t10, * t11, * t12, * t13, * t14, * t15, * t16, * t17, * t18, * t19;
   t1 = (tTile*)malloc(sizeof(tTile));
   t2 = (tTile*)malloc(sizeof(tTile));
   t3 = (tTile*)malloc(sizeof(tTile));
@@ -53,13 +53,16 @@ void drawCube()
   t14 = (tTile*)malloc(sizeof(tTile));
   t15 = (tTile*)malloc(sizeof(tTile));
   t16 = (tTile*)malloc(sizeof(tTile));
+  t17 = (tTile*)malloc(sizeof(tTile));
+  t18 = (tTile*)malloc(sizeof(tTile));
+  t19 = (tTile*)malloc(sizeof(tTile));
   
-  const struct rectangle rect = makeRect(mc2d(1,-1),mc2d(1,0.3),mc2d(-1,0.3),mc2d(-1,-1));
+  const struct rectangle rect = makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));
 
-  t1->r = t2->r = t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = t11->r = t12->r = t13->r = t14->r = t15->r = t16->r = rect;
-  t1->angle = t2->angle = t3->angle = t4->angle = t5->angle = t6->angle = t7->angle = t8->angle = 22;
-  t9->angle = 4;
-  t1->d = t2->d = t3->d = t4->d = t5->d = t6->d = t7->d = t8->d = t9->d = r;
+  t1->r = t2->r = t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = t11->r = t12->r = t13->r = t14->r = t15->r = t16->r = t17->r = t18->r = t19->r = rect;
+  t1->angle = t2->angle = t3->angle = t4->angle = t5->angle = t6->angle = t7->angle = t8->angle = t9->angle = t10->angle = 18.15;
+  t11->angle = 0;
+  t1->d = t2->d = t3->d = t4->d = t5->d = t6->d = t7->d = t8->d = t9->d = t10->d = t11->d = r;
 
 
   //neighbours
@@ -72,16 +75,19 @@ void drawCube()
   t7->n2 = t8;
   t8->n2 = t9;
   t9->n2 = t10;
-  t10->n1 = t11;//90 degree turn
+  t10->n2 = t11;
   t11->n2 = t12;
-  t12->n2 = t13;
+  t12->n1 = t13;//90 degree turn
   t13->n2 = t14;
   t14->n2 = t15;
   t15->n2 = t16;
+  t16->n2 = t17;
+  t17->n2 = t18;
+  t18->n2 = t19;
 
   struct letter letterD;
   letterD.firstTile = t1;
-  letterD.initialAngle = 90;
+  letterD.initialAngle = 88;
   
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -89,7 +95,7 @@ void drawCube()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glTranslatef(0.0, 0.0, -30.0);//camera position?!
+    glTranslatef(0.0, 7.0, -30.0);//camera position?!
 
     // Add an ambient light
     GLfloat ambientColor[] = {0.2, 0.2, 0.2, 1.0};
@@ -165,7 +171,7 @@ void handleResize(int w, int h)
 
 int main(int argc, char **argv)
 {
-  printf("Test with freeglut, connected turning squares 3.\n");
+  printf("Test with freeglut, letter D.\n");
   //printf("tsq1 with argc %d\n", argc);
 
   if(argc == 2){
@@ -200,7 +206,7 @@ int main(int argc, char **argv)
     
     glutInitWindowSize(700, 700);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("OpenGL - Rotating a Cube");
+    glutCreateWindow("OpenGL - Letter D");
     initRendering();
 
     //wire frame mode

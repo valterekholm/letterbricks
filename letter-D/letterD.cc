@@ -28,6 +28,16 @@ float angle = 0.0;
 
 float scale = 1;//for squares
 
+struct D_vars{
+  int height;//nr of bricks
+  double angleBow;//between each brick
+  int bowCount;//bricks in bow
+  const char * status;
+};
+
+struct D_vars getDVars(int);//funtion declaration
+  
+
 void drawCube()
 {
   printf("draw\n");
@@ -54,13 +64,13 @@ void drawCube()
   t15 = (tTile*)malloc(sizeof(tTile));
   t16 = (tTile*)malloc(sizeof(tTile));
   t17 = (tTile*)malloc(sizeof(tTile));
-  t18 = (tTile*)malloc(sizeof(tTile));
-  t19 = (tTile*)malloc(sizeof(tTile));
+
+
   
   const struct rectangle rect = makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));
 
-  t1->r = t2->r = t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = t11->r = t12->r = t13->r = t14->r = t15->r = t16->r = t17->r = t18->r = t19->r = rect;
-  t1->angle = t2->angle = t3->angle = t4->angle = t5->angle = t6->angle = t7->angle = t8->angle = t9->angle = t10->angle = 18.15;
+  t1->r = t2->r = t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = t11->r = t12->r = t13->r = t14->r = t15->r = t16->r = t17->r  = rect;
+  t1->angle = t2->angle = t3->angle = t4->angle = t5->angle = t6->angle = t7->angle = t8->angle = t9->angle  = 20;
   t11->angle = 0;
   t1->d = t2->d = t3->d = t4->d = t5->d = t6->d = t7->d = t8->d = t9->d = t10->d = t11->d = r;
 
@@ -75,19 +85,18 @@ void drawCube()
   t7->n2 = t8;
   t8->n2 = t9;
   t9->n2 = t10;
-  t10->n2 = t11;
+  t10->n1 = t11;//90 degree turn //TODO: automatisera val av denna
   t11->n2 = t12;
-  t12->n1 = t13;//90 degree turn
+  t12->n2 = t13;
   t13->n2 = t14;
   t14->n2 = t15;
   t15->n2 = t16;
   t16->n2 = t17;
-  t17->n2 = t18;
-  t18->n2 = t19;
+  //TODO connect to initial brick, but just pointer-wise not rendering-wise and say stop
 
   struct letter letterD;
   letterD.firstTile = t1;
-  letterD.initialAngle = 88;
+  letterD.initialAngle = 90;
   
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -220,6 +229,32 @@ int main(int argc, char **argv)
     //Add a timer for the update(...) function
     //glutTimerFunc(25, update, 0);
 
+    getDVars(6);//test
     glutMainLoop();
+
+    
     return 0;
+}
+
+///for letter D
+/*height of the inner circle of the bow*/
+struct D_vars getDVars(int height){
+  printf("getDVars (height in bricks: %d)\n", height);
+  double bowLength = ((double)height * PI) / 2;
+  printf("bowLength: %.2f\n", bowLength);
+  struct D_vars ret;
+  if(height < 5){
+    printf("height should be 5 or more\n");
+    ret.status = NULL;
+    return ret;
+  }
+
+  ret.status = "ok";
+  int piecesBow = bowLength;
+  ret.angleBow = 180 / piecesBow;
+  ret.bowCount = piecesBow;
+  ret.height = height;
+  
+  printf("pieces of Bow: %d, angleBow: %.2f\n", piecesBow, ret.angleBow);
+  return ret;
 }

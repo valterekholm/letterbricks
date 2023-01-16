@@ -32,15 +32,20 @@ struct D_vars{
   int height;//nr of bricks
   double angleBow;//between each brick
   int bowCount;//bricks in bow
+  double excessOfBow;
+  double diameterOfPieces;//the diameter if bow is cut (down to be) with the same blocks as the 'pillar'
   const char * status;
 };
 
 struct D_vars getDVars(int);//funtion declaration
-  
 
 void drawCube()
 {
+  const int HEIGHT_ = 6;
   printf("draw\n");
+
+  struct D_vars dVars = getDVars(HEIGHT_);//test
+  double heightRatio = (double)HEIGHT_ / dVars.diameterOfPieces;
 
   tTile* t1;
   tTile* t2;
@@ -64,13 +69,18 @@ void drawCube()
   t15 = (tTile*)malloc(sizeof(tTile));
   t16 = (tTile*)malloc(sizeof(tTile));
   t17 = (tTile*)malloc(sizeof(tTile));
+  t18 = (tTile*)malloc(sizeof(tTile));
+  t19 = (tTile*)malloc(sizeof(tTile));
 
+  const struct rectangle rect = makeRectAround00(TILEW,TILEW);
+  //makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));//a rect with points bottom-right top-right top-left bottom-left
+  const struct rectangle rectBow = makeRectAround00(TILEW, TILEW*heightRatio);
+  //makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));
 
-  
-  const struct rectangle rect = makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));
-
-  t1->r = t2->r = t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = t11->r = t12->r = t13->r = t14->r = t15->r = t16->r = t17->r  = rect;
-  t1->angle = t2->angle = t3->angle = t4->angle = t5->angle = t6->angle = t7->angle = t8->angle = t9->angle  = 20;
+  t1->r = t2->r = t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = t11->r = t12->r = t13->r = t14->r = t15->r = t16->r = t17->r = t18->r = t19->r = rect;
+  t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = rectBow;//testing
+  t1->angle = 0;
+  t2->angle = t3->angle = t4->angle = t5->angle = t6->angle = t7->angle = t8->angle = t9->angle = t10->angle = 20;
   t11->angle = 0;
   t1->d = t2->d = t3->d = t4->d = t5->d = t6->d = t7->d = t8->d = t9->d = t10->d = t11->d = r;
 
@@ -85,18 +95,20 @@ void drawCube()
   t7->n2 = t8;
   t8->n2 = t9;
   t9->n2 = t10;
-  t10->n1 = t11;//90 degree turn //TODO: automatisera val av denna
+  t10->n2 = t11;//90 degree turn //TODO: automatisera val av denna
   t11->n2 = t12;
-  t12->n2 = t13;
+  t12->n1 = t13;
   t13->n2 = t14;
   t14->n2 = t15;
   t15->n2 = t16;
   t16->n2 = t17;
+  t17->n2 = t18;
+  t18->n2 = t19;
   //TODO connect to initial brick, but just pointer-wise not rendering-wise and say stop
 
   struct letter letterD;
   letterD.firstTile = t1;
-  letterD.initialAngle = 90;
+  letterD.initialAngle = 90;//pointing right
   
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -229,9 +241,8 @@ int main(int argc, char **argv)
     //Add a timer for the update(...) function
     //glutTimerFunc(25, update, 0);
 
-    getDVars(6);//test
+    
     glutMainLoop();
-
     
     return 0;
 }
@@ -254,7 +265,14 @@ struct D_vars getDVars(int height){
   ret.angleBow = 180 / piecesBow;
   ret.bowCount = piecesBow;
   ret.height = height;
+
+  //get back bow 1
+  ret.diameterOfPieces = ((double)piecesBow*2)/PI;
+  double heightRatio = (double)height / ret.diameterOfPieces;
+
+  ret.excessOfBow = bowLength / (double)piecesBow;
   
-  printf("pieces of Bow: %d, angleBow: %.2f\n", piecesBow, ret.angleBow);
+  printf("pieces of Bow: %d, angleBow: %.2f, excessOfBow: %.2f, diameterOfPieces: %.4f\n", piecesBow, ret.angleBow, ret.excessOfBow, ret.diameterOfPieces);
+  printf("ratio of diameters, to be used to add...: %.3f\n", heightRatio);
   return ret;
 }

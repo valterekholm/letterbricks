@@ -1,4 +1,4 @@
-#define PI 3.14159265
+#define PI 3.141592654
 #define TILEW 2 //width
 
 /*for polygons based on circle with radius 1, one side length*/
@@ -146,7 +146,7 @@ void printStructTriangle(struct triangle t){
 
 
 
-
+//starting with bottom right, going counter clockwise
 struct rectangle makeRect(struct coord2d p1,struct coord2d p2,struct coord2d p3,struct coord2d p4){
     printf("makeRect\n");
     struct rectangle r;
@@ -171,6 +171,18 @@ struct rectangle makeRect(struct rectangle * r){
     _r.p4 = r->p4;
     const struct rectangle __r = _r;
     return __r;
+}
+
+struct rectangle makeRectAround00(double width, double height){
+
+    double x1 = 0 - width/2;
+    double x2 = x1*-1;
+    double y1 = 0 - height/2;
+    double y2 = y1*-1;
+
+    struct rectangle re = makeRect(mc2d(x2,y1), mc2d(x2,y2), mc2d(x1,y2), mc2d(x1,y1));
+    return re;
+
 }
 
 enum dire{ r, l };//direction

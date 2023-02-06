@@ -13,7 +13,11 @@
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
+//test
+#include <GL/freeglut_ext.h>
 #endif
+
+
 
 #include "../drinlett.h"
 
@@ -28,6 +32,13 @@ float angle = 0.0;
 
 float scale = 1;//for squares
 
+//test rotate by keys
+double rX=0;
+double rY=0;
+
+//test count draw function
+int countDraw=0;
+
 struct D_vars{
   int height;//nr of bricks
   double angleBow;//between each brick
@@ -39,19 +50,25 @@ struct D_vars{
 
 struct D_vars getDVars(int);//funtion declaration
 
-void drawCube()
-{
-  const int HEIGHT_ = 6;
-  printf("draw\n");
-
-  struct D_vars dVars = getDVars(HEIGHT_);//test
-  double heightRatio = (double)HEIGHT_ / dVars.diameterOfPieces;
-
+//variables global because drawXXX has no args
+//yeah drawXXX might be called repeatedly(?)
   tTile* t1;
   tTile* t2;
   tTile* t3;
   tTile* t4;
   tTile* t5, * t6, * t7, * t8, * t9, * t10, * t11, * t12, * t13, * t14, * t15, * t16, * t17, * t18, * t19;
+  const int HEIGHT_ = 6;
+  struct D_vars dVars = getDVars(HEIGHT_);//test
+  double heightRatio = (double)HEIGHT_ / dVars.diameterOfPieces;
+  const struct rectangle rect = makeRectAround00(TILEW,TILEW);
+  //makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));//a rect with points bottom-right top-right top-left bottom-left
+  const struct rectangle rectBow = makeRectAround00(TILEW, TILEW*heightRatio);
+  //makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));
+
+  struct letter letterD;
+
+void mallocInitTilesD(){
+  
   t1 = (tTile*)malloc(sizeof(tTile));
   t2 = (tTile*)malloc(sizeof(tTile));
   t3 = (tTile*)malloc(sizeof(tTile));
@@ -71,11 +88,6 @@ void drawCube()
   t17 = (tTile*)malloc(sizeof(tTile));
   t18 = (tTile*)malloc(sizeof(tTile));
   t19 = (tTile*)malloc(sizeof(tTile));
-
-  const struct rectangle rect = makeRectAround00(TILEW,TILEW);
-  //makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));//a rect with points bottom-right top-right top-left bottom-left
-  const struct rectangle rectBow = makeRectAround00(TILEW, TILEW*heightRatio);
-  //makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));
 
   t1->r = t2->r = t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = t11->r = t12->r = t13->r = t14->r = t15->r = t16->r = t17->r = t18->r = t19->r = rect;
   t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = rectBow;//testing
@@ -106,10 +118,81 @@ void drawCube()
   t18->n2 = t19;
   //TODO connect to initial brick, but just pointer-wise not rendering-wise and say stop
 
-  struct letter letterD;
+  
   letterD.firstTile = t1;
   letterD.initialAngle = 90;//pointing right
+}
+
+void freeTilesD(){
+
+  free(t1);
+  free(t2);
+  free(t3);
+  free(t4);
+  free(t5);
+  free(t6);
+  free(t7);
+  free(t8);
+  free(t9);
+  free(t10);
+  free(t11);
+  free(t12);
+  free(t13);
+  free(t14);
+  free(t15);
+  free(t16);
+  free(t17);
+  free(t18);
+  free(t19);
+
+}
+
+void keyboard(int key, int x, int y)
+{
+
+    if (key == GLUT_KEY_RIGHT)
+        {
+                rY += 15;
+        }
+    else if (key == GLUT_KEY_LEFT)
+        {
+                rY -= 15;
+        }
+    else if (key == GLUT_KEY_DOWN)
+        {
+                rX -= 15;
+        }
+    else if (key == GLUT_KEY_UP)
+        {
+                rX += 15;
+        }
+
+    // Request display update
+    glutPostRedisplay();
+}
+
+void drawCube()
+{
+  //TODO: move out all variables for graphics/shapes and it's mem allocation
+  countDraw++;
+
+  printf("draw\n");
+
   
+
+  /*
+          // Set Background Color
+    glClearColor(0.4, 0.4, 0.4, 1.0);
+        // Clear screen
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Reset transformations
+    glLoadIdentity();
+
+    // Rotate when user changes rX and rY
+    glRotatef( rX, 1.0, 0.0, 0.0 );
+    glRotatef( rY, 0.0, 1.0, 0.0 );*/
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Reset transformations
@@ -130,9 +213,13 @@ void drawCube()
 
     glTranslatef(0.5, 1.0, 0.0);
     glRotatef(angle, 1.0, 1.0, 1.0);
-
     glRotatef( angle, 1.0, 0.0, 1.0 );
     glRotatef( angle, 0.0, 1.0, 1.0 );
+
+    /*test rotating by keys*/
+    //glRotatef( rX, 1.0, 0.0, 0.0 );
+    //glRotatef( rY, 0.0, 1.0, 0.0 );
+    
     glTranslatef(-0.5, -1.0, 0.0);
 
     //renderGameTile(t1, 0);
@@ -140,16 +227,8 @@ void drawCube()
     
     glFlush();
     glutSwapBuffers();
-    free(t1);
-    free(t2);
-    free(t3);
-    free(t4);
-    free(t5);
-    free(t6);
-    free(t7);
-    free(t8);
-    free(t9);
-    free(t10);
+ 
+    printf("-----\ncountDraw: %d\n", countDraw);
 }
 
 // Function for increasing the angle variable smoothly, 
@@ -224,6 +303,9 @@ int main(int argc, char **argv)
   
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+
+    //test
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
     
     glutInitWindowSize(700, 700);
     glutInitWindowPosition(100, 100);
@@ -237,12 +319,18 @@ int main(int argc, char **argv)
 
     glutDisplayFunc(drawCube);
     glutReshapeFunc(handleResize);
+    glutSpecialFunc(keyboard);//test
 
     //Add a timer for the update(...) function
     //glutTimerFunc(25, update, 0);
 
-    
+    mallocInitTilesD();
+   
     glutMainLoop();
+
+    freeTilesD();
+
+    printf("-----\ncountDraw: %d\n", countDraw);
     
     return 0;
 }

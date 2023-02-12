@@ -14,7 +14,7 @@
 #else
 #include <GL/glut.h>
 //test
-#include <GL/freeglut_ext.h>
+#include <GL/freeglut_ext.h>//to allow free()-code after closing
 #endif
 
 
@@ -33,7 +33,7 @@ float angle = 0.0;
 float scale = 1;//for squares
 
 //test rotate by keys
-double rX=0;
+double rX=-40;
 double rY=0;
 
 //test count draw function
@@ -45,6 +45,8 @@ struct D_vars{
   int bowCount;//bricks in bow
   double excessOfBow;
   double diameterOfPieces;//the diameter if bow is cut (down to be) with the same blocks as the 'pillar'
+  double heightRatio;
+  double bowBlockAddition; //seems to be needed an adjusting variable, really like to be rid of this...
   const char * status;
 };
 
@@ -59,10 +61,9 @@ struct D_vars getDVars(int);//funtion declaration
   tTile* t5, * t6, * t7, * t8, * t9, * t10, * t11, * t12, * t13, * t14, * t15, * t16, * t17, * t18, * t19;
   const int HEIGHT_ = 6;
   struct D_vars dVars = getDVars(HEIGHT_);//test
-  double heightRatio = (double)HEIGHT_ / dVars.diameterOfPieces;
   const struct rectangle rect = makeRectAround00(TILEW,TILEW);
   //makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));//a rect with points bottom-right top-right top-left bottom-left
-  const struct rectangle rectBow = makeRectAround00(TILEW, TILEW*heightRatio);
+  const struct rectangle rectBow = makeRectAround00(TILEW, TILEW * dVars.heightRatio + dVars.bowBlockAddition);
   //makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));
 
   struct letter letterD;
@@ -117,10 +118,13 @@ void mallocInitTilesD(){
   t17->n2 = t18;
   t18->n2 = t19;
   //TODO connect to initial brick, but just pointer-wise not rendering-wise and say stop
-
   
   letterD.firstTile = t1;
   letterD.initialAngle = 90;//pointing right
+
+  if(letterD.initialAngle != 0){
+    rotateRectangle(&(letterD.firstTile->r), letterD.initialAngle);
+  }
 }
 
 void freeTilesD(){
@@ -149,22 +153,21 @@ void freeTilesD(){
 
 void keyboard(int key, int x, int y)
 {
-
     if (key == GLUT_KEY_RIGHT)
         {
-                rY += 15;
+                rY += 10;
         }
     else if (key == GLUT_KEY_LEFT)
         {
-                rY -= 15;
+                rY -= 10;
         }
     else if (key == GLUT_KEY_DOWN)
         {
-                rX -= 15;
+                rX -= 10;
         }
     else if (key == GLUT_KEY_UP)
         {
-                rX += 15;
+                rX += 10;
         }
 
     // Request display update
@@ -176,9 +179,7 @@ void drawCube()
   //TODO: move out all variables for graphics/shapes and it's mem allocation
   countDraw++;
 
-  printf("draw\n");
-
-  
+  printf("draw\n"); 
 
   /*
           // Set Background Color
@@ -199,7 +200,7 @@ void drawCube()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glTranslatef(0.0, 7.0, -30.0);//camera position?!
+    glTranslatef(0.0, rY, rX);//camera position?!
 
     // Add an ambient light
     GLfloat ambientColor[] = {0.2, 0.2, 0.2, 1.0};
@@ -211,16 +212,16 @@ void drawCube()
     glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor0);
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
 
-    glTranslatef(0.5, 1.0, 0.0);
-    glRotatef(angle, 1.0, 1.0, 1.0);
-    glRotatef( angle, 1.0, 0.0, 1.0 );
-    glRotatef( angle, 0.0, 1.0, 1.0 );
+    //glTranslatef(0.5, 1.0, 0.0);
+    ////glRotatef(angle, 1.0, 1.0, 1.0);
+    ////glRotatef( angle, 1.0, 0.0, 1.0 );
+    //glRotatef( angle, 0.0, 1.0, 1.0 );
 
     /*test rotating by keys*/
     //glRotatef( rX, 1.0, 0.0, 0.0 );
     //glRotatef( rY, 0.0, 1.0, 0.0 );
     
-    glTranslatef(-0.5, -1.0, 0.0);
+    //glTranslatef(-0.5, -1.0, 0.0);
 
     //renderGameTile(t1, 0);
     renderLetter(letterD);
@@ -268,6 +269,31 @@ void handleResize(int w, int h)
         gluPerspective(45.0, (double)w / (double)h, 1.0, 200.0);
 }
 
+//getStructRectHeight test
+/*
+void test_get_struct_rect_height(){
+
+  coord2d c1 = mc2d(0, -1);
+  coord2d c2 = mc2d(1, 0);
+  coord2d c3 = mc2d(0, 1);
+  coord2d c4 = mc2d(-1, 0);//lenght side root of 2?
+
+  coord2d c5 = mc2d(0, 0);
+  coord2d c6 = mc2d(1, 0);
+  coord2d c7 = mc2d(1, 1);
+  coord2d c8 = mc2d(0, 1);//lenght side 2?
+
+  struct rectangle test_rect = makeRect(c1,c2,c3,c4);
+  struct rectangle test_rect2 = makeRect(c5,c6,c7,c8);
+  
+  double height = getStructRectHeight(test_rect);
+  double height2 = getStructRectHeight(test_rect2);
+
+  printf("test getStructRectHeight: %.3f och %.3f\n", height, height2);
+
+  return;
+}
+*/
 
 int main(int argc, char **argv)
 {
@@ -304,7 +330,7 @@ int main(int argc, char **argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
-    //test
+    //test to allow free() by returning here after closing
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
     
     glutInitWindowSize(700, 700);
@@ -359,6 +385,10 @@ struct D_vars getDVars(int height){
   double heightRatio = (double)height / ret.diameterOfPieces;
 
   ret.excessOfBow = bowLength / (double)piecesBow;
+
+  ret.heightRatio = (double)height / ret.diameterOfPieces;
+
+  ret.bowBlockAddition = (double)height / 275;//?
   
   printf("pieces of Bow: %d, angleBow: %.2f, excessOfBow: %.2f, diameterOfPieces: %.4f\n", piecesBow, ret.angleBow, ret.excessOfBow, ret.diameterOfPieces);
   printf("ratio of diameters, to be used to add...: %.3f\n", heightRatio);

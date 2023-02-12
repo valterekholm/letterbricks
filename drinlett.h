@@ -164,6 +164,7 @@ struct rectangle makeRect(struct rectangle r){
 }
 
 struct rectangle makeRect(struct rectangle * r){
+    printf("makeRect '*'\n");
     struct rectangle _r;
     _r.p1 = r->p1;
     _r.p2 = r->p2;
@@ -427,11 +428,14 @@ double biggestFloat(double n1, double n2){
     else return n2;
 }
 
-double getStructRectHeight(struct rectangle r){
-    double smallestY = smallestFloat(smallestFloat(r.p1.y, r.p2.y), smallestFloat(r.p3.y, r.p4.y));
-    double biggestY = biggestFloat(biggestFloat(r.p1.y, r.p2.y), biggestFloat(r.p3.y, r.p4.y));
 
-    return abs(biggestY - smallestY);
+double getStructRectHeight(struct rectangle r){
+    //double smallestY = smallestFloat(smallestFloat(r.p1.y, r.p2.y), smallestFloat(r.p3.y, r.p4.y));
+    //double biggestY = biggestFloat(biggestFloat(r.p1.y, r.p2.y), biggestFloat(r.p3.y, r.p4.y));
+
+    //return abs(biggestY - smallestY);
+    double dist = getDistBetweenCoord2ds(r.p1, r.p2);
+    return dist;
 }
 
 
@@ -676,8 +680,10 @@ double renderGameTile(tTile * t, int treeLevel, tTile * prev = NULL){
   struct rectangle tempR;
 
   tempR = makeRect(t->r);//to position relative to previous tile...
+
+  treeLevel++;
   
-  printf("(%d)Tile with angle %f, ", treeLevel++, t->angle);
+  printf("(%d)Tile with angle %f, ", treeLevel, t->angle);
 
 
   
@@ -706,15 +712,15 @@ double renderGameTile(tTile * t, int treeLevel, tTile * prev = NULL){
         printf("prev has angle\n");
         int direction_swapper = prev->d == r ? 1 : -1;//r is right
         if(prev->d == r){ printf("prev-direction is right\n"); }
-        struct coord2d turnXY = getTopPoint(prev->r.p3, prev->r.p2, prev->angle * direction_swapper);
-        tempR = getRectangleFromBaseLineAndHeightWidth(turnXY, right, getDistBetweenCoord2ds(turnXY, right), getStructRectHeight(t->r));
+        struct coord2d topPoint = getTopPoint(prev->r.p3, prev->r.p2, prev->angle * direction_swapper);
+        tempR = getRectangleFromBaseLineAndHeightWidth(topPoint, right, getDistBetweenCoord2ds(topPoint, right), getStructRectHeight(t->r));
     }
     else{
         tempR = getRectangleFromBaseLineAndHeightWidth(left, right, getDistBetweenCoord2ds(left, right), getStructRectHeight(t->r));//TODO: last arg must be calculated
     }
-
-    t->r = tempR;
+    t->r = tempR;//fel, borde inte ändra på den
   }
+
   if(t->n1 == NULL) printf("n1 is null, ");
   else renderGameTile(t->n1, treeLevel, t);//todo: get the args for getRectangleFromBaseLineAndHeightWidth
   if(t->n2 == NULL) printf("n2 is null, ");
@@ -909,9 +915,6 @@ struct letter{
 };
 
 struct rectangle renderLetter(struct letter l){
-  if(l.initialAngle != 0){
-    rotateRectangle(&(l.firstTile->r), l.initialAngle);
-  }
   renderGameTile(l.firstTile, 0);
 }
 

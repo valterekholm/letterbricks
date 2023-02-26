@@ -135,18 +135,40 @@ void mallocInitTilesE(){
 
 int freeTileR(tTile * tile, int counter=0){
   if(tile->n1 != NULL){
-    counter = freeTileR(tile->n1, counter);
+    counter += freeTileR(tile->n1, counter);
   }
   if(tile->n2 != NULL){
-    counter = freeTileR(tile->n2, counter);
+    counter += freeTileR(tile->n2, counter);
   }
   if(tile->n3 != NULL){
-    counter = freeTileR(tile->n3, counter);
+    counter += freeTileR(tile->n3, counter);
   }
-counter++;
   return counter;
 }
 
+void freeTilesD(){
+
+  free(t1);
+  free(t2);
+  free(t3);
+  free(t4);
+  free(t5);
+  free(t6);
+  free(t7);
+  free(t8);
+  free(t9);
+  free(t10);
+  free(t11);
+  free(t12);
+  free(t13);
+  free(t14);
+  free(t15);
+  free(t16);
+  free(t17);
+  free(t18);
+  free(t19);
+
+}
 
 void keyboard(int key, int x, int y)
 {

@@ -6,6 +6,8 @@
 #define POLY4SIDEL 1.414214
 #define POLY5SIDEL 1.175570
 
+#define CIRCLE_DEGREES 360
+
 #include <math.h>
 
 //these are distance for an even polygons' side, ranging from 0 to 55 sides, assuming a radius of 1
@@ -183,7 +185,6 @@ struct rectangle makeRectAround00(double width, double height){
 
     struct rectangle re = makeRect(mc2d(x2,y1), mc2d(x2,y2), mc2d(x1,y2), mc2d(x1,y1));
     return re;
-
 }
 
 enum dire{ r, l };//direction
@@ -430,10 +431,7 @@ double biggestFloat(double n1, double n2){
 
 
 double getStructRectHeight(struct rectangle r){
-    //double smallestY = smallestFloat(smallestFloat(r.p1.y, r.p2.y), smallestFloat(r.p3.y, r.p4.y));
-    //double biggestY = biggestFloat(biggestFloat(r.p1.y, r.p2.y), biggestFloat(r.p3.y, r.p4.y));
 
-    //return abs(biggestY - smallestY);
     double dist = getDistBetweenCoord2ds(r.p1, r.p2);
     return dist;
 }
@@ -496,7 +494,6 @@ void printGameTriTile(tTriTile* tt){
     
 }
 
-
 //return angle in degrees
 double getAngleBetweenPoints(struct coord2d p1, struct coord2d p2){
   printf("getAngleBetweenPoints %.2f/%.2f and %.2f/%.2f\n", p1.x, p1.y, p2.x, p2.y);
@@ -529,10 +526,10 @@ struct coord2d getTopPoint(struct coord2d left, struct coord2d right, double dir
   }
 
   return topPoint;
-
 }
 
 //replaced by getTopPoint
+/*
 struct coord2d getCoordTopTriangle(tTile tile){
   printf("getCoordTopTriangle angle %f\n", tile.angle);
   if(tile.d == l){
@@ -579,6 +576,7 @@ struct coord2d getCoordTopTriangle(tTile tile){
   return ret;
   
 }
+*/
 
 struct coord2d getCoordTopTriangle(tTile * tile){
   printf("getCoordTopTriangle angle %f\n", tile->angle);
@@ -1002,7 +1000,7 @@ return c2dL;
 
 }
 
-
+//TODO: test
 struct cirkle2d deriveEvenPolygonCenterAndRadius(struct coord2d left, struct coord2d right, char nrSides){
 
 printf("deriveEvenPolygonCenterAndRadius, nrSides: %d\n", nrSides);
@@ -1187,4 +1185,94 @@ void translateGPT(struct gamePolyTile * gpt, double x, double y){
     }
 }
 
+struct D_vars{
+  int height;//nr of bricks
+  double angleBow;//between each brick
+  int bowCount;//bricks in bow
+  double excessOfBow;
+  double diameterOfPieces;//the diameter if bow is cut (down to be) with the same blocks as the 'pillar'
+  double heightRatio;
+  double bowBlockAddition; //seems to be needed an adjusting variable, really like to be rid of this...
+  const char * status;
+};
 
+struct O_vars{
+    int height; //the height of the circle measured in "bricks", inner circle, (6)
+    double angleBow;//see D
+    int circleCount;
+    double excessOfCircle;
+    double diameterOfPieces;
+    double heightRatio;
+    double blockAddition;
+    const char * status;
+};
+
+
+///for letter D
+///here described as bow and pillar...
+///shaped with a half circle, where the bricks of the two ends of the bow (connected to the pillar), are to extend perpendicular from the pillar
+/*height of the inner circle of the bow*/
+struct D_vars getDVars(int height){
+  printf("getDVars (height in bricks: %d)\n", height);
+  double bowLength = ((double)height * PI) / 2;
+  printf("bowLength: %.2f\n", bowLength);
+  struct D_vars ret;
+  if(height < 5){
+    printf("height should be 5 or more\n");
+    ret.status = NULL;
+    return ret;
+  }
+
+  ret.status = "ok";
+  int piecesBow = bowLength;
+  ret.angleBow = 180 / piecesBow;
+  ret.bowCount = piecesBow;
+  ret.height = height;
+
+  //get back bow 1
+  ret.diameterOfPieces = ((double)piecesBow*2)/PI;
+  double heightRatio = (double)height / ret.diameterOfPieces;
+
+  ret.excessOfBow = bowLength / (double)piecesBow;
+
+  ret.heightRatio = (double)height / ret.diameterOfPieces;
+
+  ret.bowBlockAddition = (double)height / 275;//?
+  
+  printf("pieces of Bow: %d, angleBow: %.2f, excessOfBow: %.2f, diameterOfPieces: %.4f\n", piecesBow, ret.angleBow, ret.excessOfBow, ret.diameterOfPieces);
+  printf("ratio of diameters, to be used to add...: %.3f\n", heightRatio);
+  return ret;
+}
+
+//setting up an "O"
+//TODO: test
+struct O_vars getOVars(int height){
+  printf("getOVars (height in bricks: %d)\n", height);
+  double oLength = ((double)height * PI);
+  printf("oLength: %.2f\n", oLength);
+  struct O_vars ret;
+  if(height < 5){
+    printf("height should be 5 or more\n");
+    ret.status = NULL;
+    return ret;
+  }
+
+  ret.status = "ok";
+  int piecesCircle = oLength;
+  ret.angleBow = CIRCLE_DEGREES / piecesCircle;
+  ret.circleCount = piecesCircle;
+  ret.height = height;
+
+  ret.diameterOfPieces = ((double)piecesCircle)/PI;
+  double heightRatio = (double)height / ret.diameterOfPieces;
+
+  ret.excessOfCircle = oLength / (double)piecesCircle;
+
+  ret.heightRatio = (double)height / ret.diameterOfPieces;
+
+  ret.blockAddition = 0;//test
+  
+  printf("pieces of circle: %d, angleBow: %.2f, excessOfCircle: %.2f, diameterOfPieces: %.4f\n", piecesCircle, ret.angleBow, ret.excessOfCircle, ret.diameterOfPieces);
+  printf("ratio of diameters, to be used to add...: %.3f\n", heightRatio);
+  return ret;
+}

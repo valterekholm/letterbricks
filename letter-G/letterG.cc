@@ -3,8 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/*this program was made after letter_B*/
-/*made from tsq4.cc*/
+/*this program was made after letter-F*/
 
 // the GLUT and OpenGL libraries have to be linked correctly
 // g++ rotateCube.cc -lglut -lGL -lGLU -o rotateCube
@@ -21,42 +20,42 @@
 
 using namespace std;
 
-// The coordinates for the vertices of the cube
-double x = 1;
-double y = 1;
-double z = 1;
-
 float angle = 0.0;
 
 float scale = 1;//for squares
 
 //test rotate by keys
-double rX=-40;
-double rY=0;
+double rX=0;
+double rY=-20;
+double rZ=-50;
 
 //test count draw function
 int countDraw=0;
 
 
-struct D_vars getDVars(int);//funtion declaration
-
 //variables global because drawXXX has no args
 //yeah drawXXX might be called repeatedly(?)
-  tTile* t1;
-  tTile* t2;
-  tTile* t3;
-  tTile* t4;
-  tTile* t5, * t6, * t7, * t8, * t9, * t10, * t11, * t12, * t13, * t14, * t15, * t16, * t17, * t18, * t19;
-  const int HEIGHT_ = 6;
-  struct D_vars dVars = getDVars(HEIGHT_);//test
+tTile* t1, * t2, * t3, * t4, * t5, * t6, * t7, * t8, * t9, * t10, * t11, * t12, * t13, * t14, * t15, * t16, * t17, * t18, * t19;
+  const int HEIGHT_ = 8;
   const struct rectangle rect = makeRectAround00(TILEW,TILEW);
-  //makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));//a rect with points bottom-right top-right top-left bottom-left
-  const struct rectangle rectBow = makeRectAround00(TILEW, TILEW * dVars.heightRatio + dVars.bowBlockAddition);
-  //makeRect(mc2d(1,-1),mc2d(1,1),mc2d(-1,1),mc2d(-1,-1));
+  
+  struct letter letterF;
 
-  struct letter letterD;
+int equipWithRects(tTile * tile, struct rectangle rawRect, int counter = 0){
+  tile->r = makeRect(rawRect);
+  if(tile->n1 != NULL){
+    counter = equipWithRects(tile->n1, rawRect, counter);
+  }
+  if(tile->n2 != NULL){
+    counter = equipWithRects(tile->n2, rawRect, counter);
+  }
+  if(tile->n3 != NULL){
+    counter = equipWithRects(tile->n3, rawRect, counter);
+  }
+  return counter;
+}  
 
-void mallocInitTilesD(){
+void mallocInitTilesF(){
   
   t1 = (tTile*)malloc(sizeof(tTile));
   t2 = (tTile*)malloc(sizeof(tTile));
@@ -73,74 +72,68 @@ void mallocInitTilesD(){
   t13 = (tTile*)malloc(sizeof(tTile));
   t14 = (tTile*)malloc(sizeof(tTile));
   t15 = (tTile*)malloc(sizeof(tTile));
-  t16 = (tTile*)malloc(sizeof(tTile));
-  t17 = (tTile*)malloc(sizeof(tTile));
-  t18 = (tTile*)malloc(sizeof(tTile));
-  t19 = (tTile*)malloc(sizeof(tTile));
 
-  t1->r = t2->r = t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = t11->r = t12->r = t13->r = t14->r = t15->r = t16->r = t17->r = t18->r = t19->r = rect;
-  t3->r = t4->r = t5->r = t6->r = t7->r = t8->r = t9->r = t10->r = rectBow;//testing
-  t1->angle = 0;
-  t2->angle = t3->angle = t4->angle = t5->angle = t6->angle = t7->angle = t8->angle = t9->angle = t10->angle = 20;
-  t11->angle = 0;
-  t1->d = t2->d = t3->d = t4->d = t5->d = t6->d = t7->d = t8->d = t9->d = t10->d = t11->d = r;
-
-
-  //neighbours
-  t1->n2 = t2;
+  //neighbours, starting from top-left, going down
+  t1->n3 = t2;//left wing, from tiles' persp.
   t2->n2 = t3;
   t3->n2 = t4;
   t4->n2 = t5;
-  t5->n2 = t6;
+  
+  t1->n2 = t6;
   t6->n2 = t7;
   t7->n2 = t8;
-  t8->n2 = t9;
+
+  t8->n3 = t9;
   t9->n2 = t10;
-  t10->n2 = t11;//90 degree turn //TODO: automatisera val av denna
-  t11->n2 = t12;
-  t12->n1 = t13;
+  t10->n2 = t11;
+  
+  t8->n2 = t12;
+  t12->n2 = t13;
   t13->n2 = t14;
   t14->n2 = t15;
-  t15->n2 = t16;
-  t16->n2 = t17;
-  t17->n2 = t18;
-  t18->n2 = t19;
-  //TODO connect to initial brick, but just pointer-wise not rendering-wise and say stop
   
-  letterD.firstTile = t1;
-  letterD.initialAngle = 90;//pointing right
 
-  if(letterD.initialAngle != 0){
-    rotateRectangle(&(letterD.firstTile->r), letterD.initialAngle);
+  //TODO: call a function to generate a rectangle for each of the tiles, going through the neighbour-pointers
+  int rectCount = equipWithRects(t1, rect);
+
+  letterF.firstTile = t1;
+  letterF.initialAngle = 180;//pointing down
+  //TODO: maybe combine the three previous steps in one function
+
+  if(letterF.initialAngle != 0){
+    rotateRectangle(&(letterF.firstTile->r), letterF.initialAngle);
   }
 }
 
-void freeTilesD(){
-
-  free(t1);
-  free(t2);
-  free(t3);
-  free(t4);
-  free(t5);
-  free(t6);
-  free(t7);
-  free(t8);
-  free(t9);
-  free(t10);
-  free(t11);
-  free(t12);
-  free(t13);
-  free(t14);
-  free(t15);
-  free(t16);
-  free(t17);
-  free(t18);
-  free(t19);
-
+int freeTileR(tTile * tile, int counter=0){
+  if(tile->n1 != NULL){
+    counter = freeTileR(tile->n1, counter);
+  }
+  if(tile->n2 != NULL){
+    counter = freeTileR(tile->n2, counter);
+  }
+  if(tile->n3 != NULL){
+    counter = freeTileR(tile->n3, counter);
+  }
+counter++;
+  return counter;
 }
 
 void keyboard(int key, int x, int y)
 {
+    int mod = glutGetModifiers();
+
+    if (mod != 0) //ALT=4  SHIFT=1  CTRL=2
+    {      
+          switch(mod)
+          {
+             case 1 :  printf("SHIFT key %d\n",mod);  break;
+             case 2 :  printf("CTRL  key %d\n",mod);  break;
+             case 4 :  printf("ALT   key %d\n",mod);  break;
+             mod=0;
+          }
+    }
+
     if (key == GLUT_KEY_RIGHT)
         {
                 rY += 10;
@@ -151,11 +144,13 @@ void keyboard(int key, int x, int y)
         }
     else if (key == GLUT_KEY_DOWN)
         {
-                rX -= 10;
+if(mod== 1) rZ+=5;
+else rX -= 10;
         }
     else if (key == GLUT_KEY_UP)
         {
-                rX += 10;
+if(mod== 1) rZ-=5;
+else rX += 10;
         }
 
     // Request display update
@@ -177,10 +172,10 @@ void drawCube()
 
     // Reset transformations
     glLoadIdentity();
-
+  */
     // Rotate when user changes rX and rY
-    glRotatef( rX, 1.0, 0.0, 0.0 );
-    glRotatef( rY, 0.0, 1.0, 0.0 );*/
+glRotatef( 30, rY*2, rZ, 0.3);
+    //glRotatef( rY, 0.0, 1.0, 0.0 );
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -188,7 +183,7 @@ void drawCube()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glTranslatef(0.0, rY, rX);//camera position?!
+    glTranslatef(rY, rX, rZ);//camera position?!
 
     // Add an ambient light
     GLfloat ambientColor[] = {0.2, 0.2, 0.2, 1.0};
@@ -212,7 +207,7 @@ void drawCube()
     //glTranslatef(-0.5, -1.0, 0.0);
 
     //renderGameTile(t1, 0);
-    renderLetter(letterD);
+    renderLetter(letterF);
     
     glFlush();
     glutSwapBuffers();
@@ -257,35 +252,10 @@ void handleResize(int w, int h)
         gluPerspective(45.0, (double)w / (double)h, 1.0, 200.0);
 }
 
-//getStructRectHeight test
-/*
-void test_get_struct_rect_height(){
-
-  coord2d c1 = mc2d(0, -1);
-  coord2d c2 = mc2d(1, 0);
-  coord2d c3 = mc2d(0, 1);
-  coord2d c4 = mc2d(-1, 0);//lenght side root of 2?
-
-  coord2d c5 = mc2d(0, 0);
-  coord2d c6 = mc2d(1, 0);
-  coord2d c7 = mc2d(1, 1);
-  coord2d c8 = mc2d(0, 1);//lenght side 2?
-
-  struct rectangle test_rect = makeRect(c1,c2,c3,c4);
-  struct rectangle test_rect2 = makeRect(c5,c6,c7,c8);
-  
-  double height = getStructRectHeight(test_rect);
-  double height2 = getStructRectHeight(test_rect2);
-
-  printf("test getStructRectHeight: %.3f och %.3f\n", height, height2);
-
-  return;
-}
-*/
-
 int main(int argc, char **argv)
 {
-  printf("Test with freeglut, letter D.\n");
+  printf("Test with freeglut, letter F.\n");
+  printf("Try arrows and SHIFT\n");
   //printf("tsq1 with argc %d\n", argc);
 
   if(argc == 2){
@@ -301,20 +271,11 @@ int main(int argc, char **argv)
 
   if(argc==2){
     printf("Argument is %s\n", argv[1]);
-
     char fl = argv[1][0];
-
     printf("first letter of arg; %c\n", fl);
 
  }
-  else{
-    
-  }
 
-  x *= scale;
-  y *= scale;
-  z *= scale;
-  
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
@@ -323,7 +284,7 @@ int main(int argc, char **argv)
     
     glutInitWindowSize(700, 700);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("OpenGL - Letter D");
+    glutCreateWindow("OpenGL - Letter F");
     initRendering();
 
     //wire frame mode
@@ -338,13 +299,16 @@ int main(int argc, char **argv)
     //Add a timer for the update(...) function
     //glutTimerFunc(25, update, 0);
 
-    mallocInitTilesD();
+    mallocInitTilesF();
    
     glutMainLoop();
 
-    freeTilesD();
+    //freeTilesD();
+    int freeCount = freeTileR(t1);
 
-    printf("-----\ncountDraw: %d\n", countDraw);
+    printf("-----\ncountDraw: %d, freeCount = %d\n", countDraw, freeCount);
     
     return 0;
 }
+
+

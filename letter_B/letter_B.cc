@@ -14,7 +14,7 @@
 /*letter C would be easier*/
 
 // the GLUT and OpenGL libraries have to be linked correctly
-// g++ rotateCube.cc -lglut -lGL -lGLU -o rotateCube
+// g++ rotateCube.cc -lglut -lGL -lGLU
 #ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
 #include <GLUT/glut.h>
@@ -42,10 +42,8 @@ void resizePolyCell(struct polyCell * pc, double newRadius){
   double sizesRatio = newRadius / pc->radius;
 
   for(int i=0; i<pc->nrCorners; i++){
-
     pc->points[i]->x = pc->points[i]->x * sizesRatio;
     pc->points[i]->y = pc->points[i]->y * sizesRatio;
-
   }
 }
 
@@ -77,7 +75,8 @@ double evenPolygonsSideRatio(char nrSides1, char nrSides2){
 
   double dist1 = getDistBetweenCoord2ds(fourPoints[0], fourPoints[1]);
   double dist2 = getDistBetweenCoord2ds(fourPoints[2], fourPoints[3]);
-  printf("dist1: %f, dist2: %f\n", dist1, dist2);//dist1 should be greater than dist2, as any side of a likesided triangle is longer than a square (fit in a cirkle)
+  printf("dist1: %f, dist2: %f\n", dist1, dist2);
+  //dist1 should be greater than dist2, as any side of a likesided triangle is longer than a square (fit in a cirkle)
 
   return dist1/dist2;
 }
@@ -148,10 +147,7 @@ void renderPolyTiles(struct gamePolyTile * gpt, int treeLevel, struct gamePolyTi
 	//side ratio
 	//sides of the two "even" polygons
 	double sRatio;
-	//TODO: change this so that comparing lengths of the two gpt's sides, and then
-	//if they are not equal
-	//alter the latter so it fits the previous
-	//alter radius and reset the points
+
 	printf("the previous one had sides of length: %.2f, this one have sides of length %.2f",
 	       dists3_55[prev->pc->nrCorners]*prev->pc->radius,
 	       dists3_55[gpt->pc->nrCorners]*gpt->pc->radius);
@@ -177,8 +173,7 @@ void renderPolyTiles(struct gamePolyTile * gpt, int treeLevel, struct gamePolyTi
 
 	//size
 	printf("old radius: %f, new radius: %f\n", gpt->pc->radius, newPolygonSpecs.radius);
-	//gpt->pc->radius = newPolygonSpecs.radius;
-	//adjustPoints(gpt->pc, newPolygonSpecs.radius / gpt->pc->radius);
+
 	multiplyRadius(gpt->pc, newPolygonSpecs.radius / gpt->pc->radius, 1);
 
 	//clearify offset position
@@ -199,7 +194,7 @@ void renderPolyTiles(struct gamePolyTile * gpt, int treeLevel, struct gamePolyTi
     }
   }
 
-  //finally rendering itself
+  //finally render itself
   renderPolyCell(*(gpt->pc), newAngle);
   printf("-----%d\n", treeLevel);
 }
@@ -218,12 +213,6 @@ void drawCube()
   gpt.name = 'b';
   gpt4.name = 'c';
 
-  //gpt4_0.angle =45;
-
-  //struct gamePolyTile gpt3 = createPolygon();
-
-  //struct gamePolyTile gpt6 = createPolygon(SIDES6);
-
   /*set all 4 neighbours (docks) of gpt*/
   gpt.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 4);
   gpt.neighbours[0] = NULL;
@@ -231,10 +220,6 @@ void drawCube()
   ////testing if neigbour is set right
   //printf("Will test printGamePolyTile with a rectangle \n");
   //printGamePolyTile(*(gpt.neighbours[1]));
-
-  //testing another
-  
-  //printGamePolyTile(gpt3);
   
   gpt.neighbours[2] = NULL;
   gpt.neighbours[3] = NULL;
@@ -287,7 +272,9 @@ void drawCube()
   glutSwapBuffers();
 }
 
-
+int freePolyTiles(struct gamePolyTile * gpt){
+  return 0;//count of free'd
+}
 
 // Function for increasing the angle variable smoothly, 
 // keeps it <=360
@@ -309,7 +296,7 @@ void initRendering()
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_COLOR_MATERIAL);
 
-        // Set the color of the background
+	// Set the color of the background
         glClearColor(0.7f, 0.8f, 1.0f, 1.0f);
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
@@ -365,8 +352,6 @@ int main(int argc, char **argv)
     
   }
   
-  //x *= scale;
-  //y *= scale;
   z *= scale;
   
     glutInit(&argc, argv);
@@ -375,7 +360,11 @@ int main(int argc, char **argv)
     glutInitWindowPosition(100, 100);
     glutCreateWindow("OpenGL - Rotating a Cube");
     initRendering();
-
+    
+    //wire frame mode
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    
     glutDisplayFunc(drawCube);
     glutReshapeFunc(handleResize);
 

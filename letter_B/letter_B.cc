@@ -227,32 +227,58 @@ void renderPolyTiles(struct gamePolyTile * gpt, int treeLevel, struct gamePolyTi
   printf("-----%d\n", treeLevel);
 }
 
+void renderGptLetter(gptLetter gptL){
+  renderPolyTiles(gptL.startTile, 0);   
+}
+
 
 void drawCube()
 {
   char SIDES3 = 3, SIDES4 = 4, SIDES5 = 5, SIDES6 = 6;
   printf("draw\n");
 
-  struct gamePolyTile gpt4_0 = createPolygon(SIDES4,0);
-  struct gamePolyTile gpt = createPolygon(SIDES5,0);
-  struct gamePolyTile gpt4 = createPolygon(SIDES4,0);
-  struct gamePolyTile gpt4_2 = createPolygon(SIDES4,0);
-  struct gamePolyTile gpt3_0 = createPolygon(SIDES3,0);
-  struct gamePolyTile gpt4_3 = createPolygon(SIDES4,0);
-  
+  struct gamePolyTile gpt4_01 = createPolygon(SIDES4,90);
+  struct gamePolyTile gpt4_0 = createPolygon(SIDES4);
+  struct gamePolyTile gpt = createPolygon(SIDES5);//junction
+  struct gamePolyTile gpt4 = createPolygon(SIDES4);
+  struct gamePolyTile gpt4_2 = createPolygon(SIDES4);
+  struct gamePolyTile gpt3_0 = createPolygon(SIDES3);
+  struct gamePolyTile gpt4_3 = createPolygon(SIDES4);
+  struct gamePolyTile gpt3_1 = createPolygon(SIDES3);
+  struct gamePolyTile gpt4_4 = createPolygon(SIDES4);//TODO: make so that 'angle' needs to be set once only during creation
 
+  struct gamePolyTile gpt4_012 = createPolygon(SIDES4);
+
+
+  
+  struct gptLetter letterB;
+  letterB.startTile = &gpt4_01;
+  letterB.rotation = 0;
+
+  gpt4_01.name = 'i';
   gpt4_0.name = 'a';
   gpt.name = 'b';
   gpt4.name = 'c';
   gpt4_2.name = 'd';
   gpt3_0.name = 'e';
   gpt4_3.name = 'f';
+  gpt3_1.name = 'g';
+  gpt4_4.name = 'h';
+
+  gpt4_012.name = 'j';
+  
+
+
+  gpt4_01.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_01.neighbours[0] = &gpt4_012;
+  gpt4_01.neighbours[1] = &gpt4_0;
+  gpt4_01.neighbours[2] = NULL;
 
   /*3 neighbours (docks) of gpt4_0*/
   gpt4_0.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
   gpt4_0.neighbours[0] = NULL;
   gpt4_0.neighbours[1] = &gpt;
-  gpt4_0.neighbours[0] = NULL;
+  gpt4_0.neighbours[2] = NULL;
 
   
   /*set all 4 neighbours (docks) of gpt*/
@@ -278,9 +304,18 @@ void drawCube()
 
   gpt4_3.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
   gpt4_3.neighbours[0] = NULL;
-  gpt4_3.neighbours[1] = NULL;
+  gpt4_3.neighbours[1] = &gpt3_1;
   gpt4_3.neighbours[2] = NULL;
 
+  gpt3_1.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 2);
+  gpt3_1.neighbours[0] = &gpt4_4;
+  gpt3_1.neighbours[1] = NULL;
+
+  gpt4_4.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_4.neighbours[0] = NULL;
+  gpt4_4.neighbours[1] = NULL;
+  gpt4_4.neighbours[2] = NULL;
+  
   //compare sides lengths
   //useful if scaling circle-based polygons of different corner-count so that sides match lengthwise 
   //double ratio4_5 = evenPolygonsSideRatio(SIDES4, SIDES5);
@@ -312,7 +347,8 @@ void drawCube()
   glRotatef( angle, 0.0, 1.0, 1.0 );
   glTranslatef(-0.5, -1.0, 0.0);
 
-  renderPolyTiles(&gpt4_0,0);
+  //renderPolyTiles(&gpt4_0,0);
+  renderGptLetter(letterB);
 
   //todo: make it one function, freePolyTiles
   freePolyTile(gpt);
@@ -321,6 +357,10 @@ void drawCube()
   freePolyTile(gpt4_2);
   freePolyTile(gpt3_0);
   freePolyTile(gpt4_3);
+  freePolyTile(gpt3_1);
+  freePolyTile(gpt4_4);
+  freePolyTile(gpt4_01);
+  freePolyTile(gpt4_012);
   
   glFlush();
   glutSwapBuffers();

@@ -379,6 +379,11 @@ struct gamePolyTile{
   struct gamePolyTile ** neighbours; // should be 0 - correspond to the polyCells' points, but have one less, exluding the side from last to first point (the starting)
 };
 
+struct gptLetter{
+    struct gamePolyTile * startTile;
+    double rotation;
+};
+
 //angle is analog to the tile's direction (2D), an 90 degrees offset from the base (the line between [left] and [right])
 //left and right are two points, making up the tile's "base"
 //rectangle is defined with points counter clockwise starting at [right], 1,2,3,4, ending at [left]
@@ -683,8 +688,6 @@ double renderGameTile(tTile * t, int treeLevel, tTile * prev = NULL){
   
   printf("(%d)Tile with angle %f, ", treeLevel, t->angle);
 
-
-  
   if(prev == NULL){
     printf(" (prev is null) ");
   }
@@ -757,6 +760,8 @@ double renderGameTile(tTile * t, int treeLevel, tTile * prev = NULL){
   double hei = getStructRectHeight(t->r);//TODO: add top-triangle height
   return hei;
 }
+
+
 
 //todo: use center, rotation
 void renderTriangle(struct triangle tri, gender g, int treeLevel){
@@ -1087,8 +1092,9 @@ void adjustPoints(struct polyCell * p, double multiplyWith){
 
 //create like-sided polygon using circle shape
 //todo: think about if position should be an argument
-struct gamePolyTile createPolygon(int nrSides, double rotation, double radius = 1){
+struct gamePolyTile createPolygon(int nrSides, double rotation=0){
   printf("createPolygon, nrSides: %d\n", nrSides);
+  double radius = 1;
   int step = 360 / nrSides;//in degrees
   double startDeg = (180 - (double)step/2) + rotation;
   double offsetX = 0;

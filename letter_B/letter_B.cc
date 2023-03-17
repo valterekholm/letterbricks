@@ -41,9 +41,16 @@ void resizePolyCell(struct polyCell * pc, double newRadius){
   printf("resizePolyCell, from %f to %f\n", pc->radius, newRadius);
   double sizesRatio = newRadius / pc->radius;
 
+  double offsetX = pc->center.x;
+  double offsetY = pc->center.y;
+
   for(int i=0; i<pc->nrCorners; i++){
-    pc->points[i]->x = pc->points[i]->x * sizesRatio;
-    pc->points[i]->y = pc->points[i]->y * sizesRatio;
+    double tempx = pc->points[i]->x - offsetX;
+    double tempy = pc->points[i]->y - offsetY;
+    tempx *= sizesRatio;
+    tempy *= sizesRatio;
+    pc->points[i]->x = tempx+offsetX;
+    pc->points[i]->y = tempy+offsetY;
   }
 }
 
@@ -97,10 +104,8 @@ void printGamePolyTile(struct gamePolyTile gpt){
   printf("Distance between two first corners: %f\n", distFirst2);  
 }
 
-//having offset as argument could unburden the polyCell of any relocation assignment
-void renderPolyCell(struct polyCell pc, double rotate, struct coord2d * offset = NULL){
-
-  printf("renderPolyCell... ");
+void rotatePolyCell(struct polyCell pc, double rotate){
+  printf("rotatePolyCell\n");
   if(rotate != 0){
     printf("rotate is %.1f... ", rotate);
     
@@ -109,22 +114,35 @@ void renderPolyCell(struct polyCell pc, double rotate, struct coord2d * offset =
       pc.points[i]->x = newPoint.x;
       pc.points[i]->y = newPoint.y;
     }
-  }
+  }  
+}
+
+//having offset as argument could unburden the polyCell of any relocation assignment
+void renderPolyCell(struct polyCell pc, struct coord2d * offset = NULL){
+
+  printf("renderPolyCell... ");
+
   glBegin(GL_POLYGON);
   double color = 0.8;
   glColor3f(0.5, 0.3, color);
   for(int i=0; i< pc.nrCorners; i++){
-    glVertex3f(pc.center.x + pc.points[i]->x, pc.center.y + pc.points[i]->y, 0);
+    glVertex3f(pc.points[i]->x, pc.points[i]->y, 0);
   }
   glEnd();
+}
+
+void movePCPoints(struct polyCell pc, double moveX, double moveY){
+  for(int i=0; i< pc.nrCorners; i++){
+    pc.points[i]->x += moveX;
+    pc.points[i]->y += moveY;
+  }
 }
 
 //for circle based polygon tiles
 //a recursive function
 void renderPolyTiles(struct gamePolyTile * gpt, int treeLevel, struct gamePolyTile * prev = NULL){
   printf("renderPolyTiles, treeLevel %d, name: %c\n", treeLevel, gpt->name);
-  
-  double newAngle = 0;
+  double newAngle = 0, diffX, diffY;
   if(prev == NULL){
     printf("This is the first polygon\n");
   }
@@ -132,10 +150,10 @@ void renderPolyTiles(struct gamePolyTile * gpt, int treeLevel, struct gamePolyTi
     printf("This is a follower polygon\n");
 
     //look at prev
-
     for(int i=0; i < prev->pc->nrCorners-1; i++){
       if(gpt == prev->neighbours[i]){
 	//get base points
+	//TODO: find error, the lef, rig got wrong
 	struct coord2d lef = mc2d((prev->pc->points[i+1])->x, (prev->pc->points[i+1])->y);
 	struct coord2d rig = mc2d((prev->pc->points[i])->x, (prev->pc->points[i])->y);
 	printf("This is neighbour at dock %d, with coords (left,right) :\n", i);
@@ -148,28 +166,34 @@ void renderPolyTiles(struct gamePolyTile * gpt, int treeLevel, struct gamePolyTi
 	//sides of the two "even" polygons
 	double sRatio;
 
-	printf("the previous one had sides of length: %.2f, this one have sides of length %.2f",
+	/*printf("the previous one had sides of length: %.2f, this one have sides of length %.2f",
 	       dists3_55[prev->pc->nrCorners]*prev->pc->radius,
-	       dists3_55[gpt->pc->nrCorners]*gpt->pc->radius);
+	       dists3_55[gpt->pc->nrCorners]*gpt->pc->radius);*/ //verkar funka
 
 	//newAngle is between left->right base point but need angle "up" from that base
 	newAngle -= 90;
-	printf("newAngle is %.1f\n", newAngle);
+	//printf("newAngle is %.1f\n", newAngle); //verkar funka
 
 	//set angle
 	gpt->angle = newAngle;
-	printf("This angle is set to %.1f\n", gpt->angle);
+	//printf("This angle is set to %.1f\n", gpt->angle); //verkar funka
 	
-	//find ratio between this (gpt) side and it's radius
-	//double ratio = getRatioPolygonSideAndRadius(gpt->pc->nrCorners);
-
+		
 	//derive where the new circle should be
 	//also getting the radius
-	cirkle2d newPolygonSpecs = deriveEvenPolygonCenterAndRadius(lef,rig,gpt->pc->nrCorners);
+	cirkle2d newPolygonSpecs = deriveEvenPolygonCenterAndRadius(lef,rig,gpt->pc->nrCorners, treeLevel);
 
-	//position
+	diffX = newPolygonSpecs.center.x - gpt->pc->center.x;
+	diffY = newPolygonSpecs.center.y - gpt->pc->center.y;
+
+	printf("    DiffX Y: %f   %f\n", diffX, diffY);
+
+	//position self
 	gpt->pc->center.x = newPolygonSpecs.center.x;
 	gpt->pc->center.y = newPolygonSpecs.center.y;
+
+	//update points?
+	
 
 	//size
 	printf("old radius: %f, new radius: %f\n", gpt->pc->radius, newPolygonSpecs.radius);
@@ -182,53 +206,80 @@ void renderPolyTiles(struct gamePolyTile * gpt, int treeLevel, struct gamePolyTi
     }
   }
 
+  movePCPoints(*(gpt->pc), diffX, diffY);//seems to be the best place here, to call
+  rotatePolyCell(*(gpt->pc), newAngle);
+  
   for(int i=0; i< gpt->pc->nrCorners-1; i++){
     if(gpt->neighbours[i]==NULL){
       printf("neighbour dock %d is null\n", i);
     }
     else{
       printf("neighbour dock %d is not null\n", i);
-
       //calling itself
       renderPolyTiles(gpt->neighbours[i], treeLevel+1, gpt);
     }
   }
 
+  
   //finally render itself
-  renderPolyCell(*(gpt->pc), newAngle);
+
+  renderPolyCell(*(gpt->pc));
   printf("-----%d\n", treeLevel);
 }
 
 
 void drawCube()
 {
-  char SIDES4 = 4, SIDES5 = 5, SIDES6 = 6;
+  char SIDES3 = 3, SIDES4 = 4, SIDES5 = 5, SIDES6 = 6;
   printf("draw\n");
 
-  struct gamePolyTile gpt4_0 = createPolygon(SIDES4,0,1);
+  struct gamePolyTile gpt4_0 = createPolygon(SIDES4,0);
   struct gamePolyTile gpt = createPolygon(SIDES5,0);
   struct gamePolyTile gpt4 = createPolygon(SIDES4,0);
+  struct gamePolyTile gpt4_2 = createPolygon(SIDES4,0);
+  struct gamePolyTile gpt3_0 = createPolygon(SIDES3,0);
+  struct gamePolyTile gpt4_3 = createPolygon(SIDES4,0);
+  
 
   gpt4_0.name = 'a';
   gpt.name = 'b';
   gpt4.name = 'c';
-
-  /*set all 4 neighbours (docks) of gpt*/
-  gpt.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 4);
-  gpt.neighbours[0] = NULL;
-  gpt.neighbours[1] = &gpt4;
-  ////testing if neigbour is set right
-  //printf("Will test printGamePolyTile with a rectangle \n");
-  //printGamePolyTile(*(gpt.neighbours[1]));
-  
-  gpt.neighbours[2] = NULL;
-  gpt.neighbours[3] = NULL;
+  gpt4_2.name = 'd';
+  gpt3_0.name = 'e';
+  gpt4_3.name = 'f';
 
   /*3 neighbours (docks) of gpt4_0*/
   gpt4_0.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
   gpt4_0.neighbours[0] = NULL;
   gpt4_0.neighbours[1] = &gpt;
   gpt4_0.neighbours[0] = NULL;
+
+  
+  /*set all 4 neighbours (docks) of gpt*/
+  gpt.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 4);
+  gpt.neighbours[0] = NULL;
+  gpt.neighbours[1] = &gpt4;
+  gpt.neighbours[2] = &gpt4_2;
+  gpt.neighbours[3] = NULL;
+
+  gpt4.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4.neighbours[0] = NULL;
+  gpt4.neighbours[1] = &gpt3_0;
+  gpt4.neighbours[2] = NULL;
+  
+  gpt4_2.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_2.neighbours[0] = NULL;
+  gpt4_2.neighbours[1] = NULL;
+  gpt4_2.neighbours[2] = NULL;
+
+  gpt3_0.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 2);
+  gpt3_0.neighbours[0] = &gpt4_3;
+  gpt3_0.neighbours[1] = NULL;
+
+  gpt4_3.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_3.neighbours[0] = NULL;
+  gpt4_3.neighbours[1] = NULL;
+  gpt4_3.neighbours[2] = NULL;
 
   //compare sides lengths
   //useful if scaling circle-based polygons of different corner-count so that sides match lengthwise 
@@ -267,6 +318,9 @@ void drawCube()
   freePolyTile(gpt);
   freePolyTile(gpt4);
   freePolyTile(gpt4_0);
+  freePolyTile(gpt4_2);
+  freePolyTile(gpt3_0);
+  freePolyTile(gpt4_3);
   
   glFlush();
   glutSwapBuffers();

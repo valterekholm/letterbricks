@@ -1001,9 +1001,9 @@ return c2dL;
 }
 
 //TODO: test
-struct cirkle2d deriveEvenPolygonCenterAndRadius(struct coord2d left, struct coord2d right, char nrSides){
+struct cirkle2d deriveEvenPolygonCenterAndRadius(struct coord2d left, struct coord2d right, char nrSides, int level){
 
-printf("deriveEvenPolygonCenterAndRadius, nrSides: %d\n", nrSides);
+printf("deriveEvenPolygonCenterAndRadius, nrSides: %d, level: %d\n", nrSides, level);
 
 //1. know the angle of l1 and r1
 //assuming the polygon is not rotated
@@ -1016,7 +1016,7 @@ double adiff = angleL1 - angleR1;//i.e. 90 in a square
 
 //get angle between points
 double abp = getAngleBetweenPoints(left, right);
-printf("angle between points: %.1f\n", abp);
+printf("  angle between points: %.1f\n", abp);
 
 //angle towards center should then be 90 less from plane but from a point?
 //use adiff
@@ -1032,18 +1032,18 @@ double angleR = abp-90-(adiff/2)+180;
 //double ratio = getRatioPolygonSideAndRadius(nrSides);
 double ratio = dists3_55[nrSides];
 
-printf("ratio: %.2f\n", ratio);
+printf("  ratio: %.2f\n", ratio);
 
 //get inverted ratio
 double ratioI = 1/ratio;
 
 //get distance between l1 r1
 double distance = getDistBetweenCoord2ds(left, right);
-printf("distance: %.2f\n", distance);
+printf("  distance: %.2f\n", distance);
 
 //calculate new radius ... distance to center
 double newRadius = distance * ratioI;
-printf("newRadius: %.2f\n", newRadius);
+printf("  newRadius: %.2f\n", newRadius);
 
 //invert the angle, direction to center
 double newAngleL1 = (angleL+180);
@@ -1059,7 +1059,7 @@ double newY = cos_degr(newAngleL1)*newRadius;//ratio;
 newX += left.x;
 newY += left.y;
 
-printf("newX: %.2f, newY: %.2f\n", newX, newY);
+printf("  newX: %.2f, newY: %.2f\n", newX, newY);
 
 struct coord2d c2d = coord2dFromXY(newX, newY);
 struct cirkle2d ci2d;

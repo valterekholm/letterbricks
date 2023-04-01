@@ -375,7 +375,7 @@ struct polyCell{
 struct gamePolyTile{
   char name;
   struct polyCell * pc;
-  double angle; //initial angle added to polyCell shape trough rotation
+  double angle; //initial angle added to (next) polyCell shape trough rotation
   struct gamePolyTile ** neighbours; // should be 0 - correspond to the polyCells' points, but have one less, exluding the side from last to first point (the starting)
 };
 

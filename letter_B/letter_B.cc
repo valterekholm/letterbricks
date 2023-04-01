@@ -245,11 +245,29 @@ void drawCube()
   struct gamePolyTile gpt3_0 = createPolygon(SIDES3);
   struct gamePolyTile gpt4_3 = createPolygon(SIDES4);
   struct gamePolyTile gpt3_1 = createPolygon(SIDES3);
-  struct gamePolyTile gpt4_4 = createPolygon(SIDES4);//TODO: make so that 'angle' needs to be set once only during creation
+  struct gamePolyTile gpt4_4 = createPolygon(SIDES4);
+  struct gamePolyTile gpt_01 = createPolygon(SIDES5);//unused
+  struct gamePolyTile gpt4_5 = createPolygon(SIDES4);
+  struct gamePolyTile gpt4_6 = createPolygon(SIDES4);
 
   struct gamePolyTile gpt4_012 = createPolygon(SIDES4);
+  struct gamePolyTile gpt4_013 = createPolygon(SIDES4);
+  struct gamePolyTile gpt4_014 = createPolygon(SIDES4);
+  struct gamePolyTile gpt4_015 = createPolygon(SIDES4);
 
+  //up
+  struct gamePolyTile gpt4_02 = createPolygon(SIDES4);
+  struct gamePolyTile gpt4_03 = createPolygon(SIDES4);
+  struct gamePolyTile gpt4_04 = createPolygon(SIDES4);
+  struct gamePolyTile gpt4_05 = createPolygon(SIDES4);
 
+  //upper turn
+  struct gamePolyTile gpt3_2 = createPolygon(SIDES3);
+  struct gamePolyTile gpt4_7 = createPolygon(SIDES4);
+  struct gamePolyTile gpt3_3 = createPolygon(SIDES3);
+  struct gamePolyTile gpt4_8 = createPolygon(SIDES4);
+  struct gamePolyTile gpt4_9 = createPolygon(SIDES4);
+  struct gamePolyTile gpt4_10 = createPolygon(SIDES4);
   
   struct gptLetter letterB;
   letterB.startTile = &gpt4_01;
@@ -264,15 +282,14 @@ void drawCube()
   gpt4_3.name = 'f';
   gpt3_1.name = 'g';
   gpt4_4.name = 'h';
+  gpt4_5.name = 'i';
 
-  gpt4_012.name = 'j';
+  gpt4_012.name = 'j';//going down from middle
   
-
-
   gpt4_01.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
   gpt4_01.neighbours[0] = &gpt4_012;
   gpt4_01.neighbours[1] = &gpt4_0;
-  gpt4_01.neighbours[2] = NULL;
+  gpt4_01.neighbours[2] = &gpt4_02;
 
   /*3 neighbours (docks) of gpt4_0*/
   gpt4_0.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
@@ -295,7 +312,7 @@ void drawCube()
   
   gpt4_2.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
   gpt4_2.neighbours[0] = NULL;
-  gpt4_2.neighbours[1] = NULL;
+  gpt4_2.neighbours[1] = &gpt3_2;
   gpt4_2.neighbours[2] = NULL;
 
   gpt3_0.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 2);
@@ -313,8 +330,78 @@ void drawCube()
 
   gpt4_4.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
   gpt4_4.neighbours[0] = NULL;
-  gpt4_4.neighbours[1] = NULL;
+  gpt4_4.neighbours[1] = &gpt4_5;
   gpt4_4.neighbours[2] = NULL;
+
+  gpt4_5.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_5.neighbours[0] = NULL;
+  gpt4_5.neighbours[1] = &gpt4_6;
+  gpt4_5.neighbours[2] = NULL;
+
+  //down
+  gpt4_012.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_012.neighbours[0] = NULL;
+  gpt4_012.neighbours[1] = &gpt4_013;
+  gpt4_012.neighbours[2] = NULL;
+
+  //down
+  gpt4_013.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_013.neighbours[0] = NULL;
+  gpt4_013.neighbours[1] = &gpt4_014;
+  gpt4_013.neighbours[2] = NULL;
+
+  //down
+  gpt4_014.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_014.neighbours[0] = NULL;
+  gpt4_014.neighbours[1] = &gpt4_015;
+  gpt4_014.neighbours[2] = NULL;
+
+  
+  //unused
+  gpt_01.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 4);
+  gpt_01.neighbours[0] = NULL;
+  gpt_01.neighbours[1] = NULL;
+  gpt_01.neighbours[2] = NULL;
+
+  //up
+  gpt4_02.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_02.neighbours[0] = NULL;
+  gpt4_02.neighbours[1] = &gpt4_03;
+  gpt4_02.neighbours[2] = NULL;
+
+  gpt4_03.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_03.neighbours[0] = NULL;
+  gpt4_03.neighbours[1] = &gpt4_04;
+  gpt4_03.neighbours[2] = NULL;
+
+  gpt4_04.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_04.neighbours[0] = NULL;
+  gpt4_04.neighbours[1] = &gpt4_05;
+  gpt4_04.neighbours[2] = NULL;
+
+  //upper turn
+  gpt3_2.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 2);
+  gpt3_2.neighbours[0] = NULL;
+  gpt3_2.neighbours[1] = &gpt4_7;
+
+  gpt4_7.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_7.neighbours[0] = NULL;
+  gpt4_7.neighbours[1] = &gpt3_3;
+  gpt4_7.neighbours[2] = NULL;
+
+  gpt3_3.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 2);
+  gpt3_3.neighbours[0] = NULL;
+  gpt3_3.neighbours[1] = &gpt4_8;
+
+  gpt4_8.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_8.neighbours[0] = NULL;
+  gpt4_8.neighbours[1] = &gpt4_9;
+  gpt4_8.neighbours[2] = NULL;
+
+  gpt4_9.neighbours = (struct gamePolyTile **) malloc(sizeof(struct gamePolyTile) * 3);
+  gpt4_9.neighbours[0] = NULL;
+  gpt4_9.neighbours[1] = &gpt4_10;
+  gpt4_9.neighbours[2] = NULL;
   
   //compare sides lengths
   //useful if scaling circle-based polygons of different corner-count so that sides match lengthwise 

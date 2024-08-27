@@ -917,9 +917,10 @@ struct letter{
   double initialAngle; // 0 means stright up, 20 means little to the rigth, -20 left... maybe needs constraints
 };
 
-struct rectangle renderLetter(struct letter l){
+void renderLetter(struct letter l){
   renderGameTile(l.firstTile, 0);
-}
+  return;
+};
 
 //get the length of one side of a like-sided polygon, where radius of circle is 1
 double getRatioPolygonSideAndRadius(int nrSides){
